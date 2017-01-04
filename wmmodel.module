@@ -1,0 +1,29 @@
+<?php
+
+/**
+ * @file
+ * Defines the Wieni Model module.
+ *
+ * @category module
+ *
+ * @package Wieni
+ */
+
+function wmmodel_entity_type_build(array &$entity_types)
+{
+    // Meh, hook_entity_type_build gets called multiple times
+    $data = &drupal_static(__FUNCTION__);
+    if (isset($data['wmmodel.mapping'])) {
+        return;
+    }
+
+    // Fetch mappings from other modules.
+    $mapping = \Drupal::moduleHandler()->invokeAll('entity_model_mapping');
+    // Allow modules to alter the assigned mappings.
+    \Drupal::moduleHandler()->alter('entity_model_mapping', $mapping);
+    // Cache the mapping
+    \Drupal::cache()->set('wmmodel.mapping', $mapping);
+
+    // Set static cache so we don't run this another time
+    $data['wmmodel.mapping'] = true;
+}

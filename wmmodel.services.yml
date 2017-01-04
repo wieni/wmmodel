@@ -1,0 +1,5 @@
+services:
+    wmmodel.factory.model:
+        class:  Drupal\wmmodel\Factory\ModelFactory
+    wmmodel.service.finder:
+        class: Drupal\wmmodel\Service\ModelFinder
