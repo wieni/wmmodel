@@ -1,0 +1,37 @@
+diff --git a/core/lib/Drupal/Core/Entity/ContentEntityStorageBase.php b/core/lib/Drupal/Core/Entity/ContentEntityStorageBase.php
+index afdce40..12db30b 100644
+--- a/core/lib/Drupal/Core/Entity/ContentEntityStorageBase.php
++++ b/core/lib/Drupal/Core/Entity/ContentEntityStorageBase.php
+@@ -84,7 +84,12 @@ protected function doCreate(array $values) {
+       }
+       $bundle = $values[$this->bundleKey];
+     }
+-    $entity = new $this->entityClass(array(), $this->entityTypeId, $bundle);
++    if (\Drupal::hasService('wmmodel.factory.model')) {
++      $modelFactory = \Drupal::service('wmmodel.factory.model');
++      $entity = $modelFactory->createModel(array(), $this->entityType, $bundle);
++    } else {
++      $entity = new $this->entityClass(array(), $this->entityTypeId, $bundle);
++    }
+     $this->initFieldValues($entity, $values);
+     return $entity;
+   }
+diff --git a/core/lib/Drupal/Core/Entity/Sql/SqlContentEntityStorage.php b/core/lib/Drupal/Core/Entity/Sql/SqlContentEntityStorage.php
+index 2ea450d..5b2373c 100644
+--- a/core/lib/Drupal/Core/Entity/Sql/SqlContentEntityStorage.php
++++ b/core/lib/Drupal/Core/Entity/Sql/SqlContentEntityStorage.php
+@@ -485,7 +485,13 @@ protected function mapFromStorageRecords(array $records, $load_from_revision = F
+     foreach ($values as $id => $entity_values) {
+       $bundle = $this->bundleKey ? $entity_values[$this->bundleKey][LanguageInterface::LANGCODE_DEFAULT] : FALSE;
+       // Turn the record into an entity class.
+-      $entities[$id] = new $this->entityClass($entity_values, $this->entityTypeId, $bundle, array_keys($translations[$id]));
++      if (\Drupal::hasService('wmmodel.factory.model')) {
++        $modelFactory = \Drupal::service('wmmodel.factory.model');
++        $entity = $modelFactory->createModel($entity_values, $this->entityType, $bundle, array_keys($translations[$id]));
++      } else {
++        $entity = new $this->entityClass($entity_values, $this->entityType->id(), $bundle, array_keys($translations[$id]));
++      }
++      $entities[$id] = $entity;
+     }
+ 
+     return $entities;
