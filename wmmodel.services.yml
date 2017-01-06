@@ -1,4 +1,7 @@
 services:
+    controller_resolver:
+      class: Drupal\wmmodel\Controller\ControllerResolver
+      arguments: ['@psr7.http_message_factory', '@class_resolver']
     wmmodel.factory.model:
         class:  Drupal\wmmodel\Factory\ModelFactory
     wmmodel.service.finder:
