@@ -2,6 +2,8 @@
 
 namespace Drupal\wmmodel\Factory;
 
+use Doctrine\Common\Inflector\Inflector;
+use Drupal\Core\Cache\CacheBackendInterface;
 use Drupal\Core\Entity\ContentEntityInterface;
 use Drupal\Core\Entity\EntityTypeInterface;
 
@@ -11,11 +13,16 @@ class ModelFactory
     /** @var array */
     protected static $mapping;
 
+    /** @var CacheBackendInterface */
+    protected $cacheBackend;
+
     /**
      * ModelFactory constructor.
+     * @param CacheBackendInterface $cacheBackend
      */
-    public function __construct()
+    public function __construct(CacheBackendInterface $cacheBackend)
     {
+        $this->cacheBackend = $cacheBackend;
         $this->loadMapping();
     }
 
@@ -34,7 +41,7 @@ class ModelFactory
         $bundle = false,
         $translations = array()
     ) {
-        $modelName = $entity_type->id() . '_' . $bundle;
+        $modelName = $entity_type->id() . '.' . Inflector::singularize($bundle);
 
         // By default, use the given class
         $className = $entity_type->getClass();
@@ -73,7 +80,7 @@ class ModelFactory
     protected function loadMapping()
     {
         if (empty(static::$mapping)) {
-            $mapping = \Drupal::cache()->get('wmmodel.mapping')->data;
+            $mapping = $this->cacheBackend->get('mapping')->data;
             static::$mapping = $mapping;
         }
     }

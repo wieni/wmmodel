@@ -2,6 +2,17 @@
 
 A convenient way to manage bundle-specific code in Drupal 8.
 
+```
+// Have the entitystorage return your classes
+$articleId = 1;
+$entity = \Drupal::entityTypeManager()->getStorage('node')->load($articleId);
+echo get_class($entity); // Drupal\mymodule\Entity\Node\Article
+
+// Or create a new article
+$newArticle = Article::create();
+$newArticle->setSomeCustomField($foobar);
+```
+
 ## Installation
 
 ```
@@ -10,7 +21,7 @@ composer require wieni\wmmodel
 
 Patch your core installation of Drupal 8.
 
-The patch will alter how Drupal creates an instance of your entity so Storages will return your models.
+The patch will alter how Drupal creates an instance of entities so Storages will return your models.
 
 ```
 // composer.json
@@ -19,7 +30,7 @@ The patch will alter how Drupal creates an instance of your entity so Storages w
     
     "extra": {
         "patches": {
-            "drupal/core": "todo: public link to the patch"
+            "drupal/core": "https://cdn.rawgit.com/wieni/wmmodel/0.2.0/src/Patch/core/wmmodel.patch"
         }
     }
 }
@@ -29,23 +40,19 @@ Clear the cache
 
 ```
 drush cr
-```
-
-List all bundles and their model
-
-```
+drush en wmmodel
 drush model-list
 ```
 
 ## Creating Models
 
-A model has to implement `Drupal\Core\Entity\ContentEntityInterface` and `Drupal\wmmodel\Entity\Interfaces\WmModelInterface`.
+A model has to implement `ContentEntityInterface` and `WmModelInterface`.
 
-It's recommended to extend either `Drupal\node\Entity\Node` or `Drupal\eck\Entity\EckEntity` depending on what kind of model you are making.
+It's recommended to extend `Drupal\node\Entity\Node`, `Drupal\taxonomy\Entity\Term` or `Drupal\eck\Entity\EckEntity` depending on what kind of model you are making.
 
 Implement `Drupal\wmmodel\Entity\Interfaces\WmModelInterface`. This forces you to define a static method called `getModelInfo()` that will return an array with the `EntityType` and `BundleName` of your model.
 
-The trait `Drupal\wmmodel\Entity\Traits\WmModel` can be used to assist you.
+The trait `Drupal\wmmodel\Entity\Traits\WmModel` can do this for you.
 
 > Follow the `<module>/Entity/<storage>/<bundle>` namespace convention to make your life easier.
 
@@ -66,6 +73,15 @@ class Article extends Node implements WmModelInterface
 }
 ```
 
+> Create an Abstract[EntityTypeId] class for each of your types.
+> It takes about 5 minutes at the start of your project.
+>
+> `src/Entity/Node/NodeModel`
+> 
+> `src/Entity/TaxonomyTerm/TermModel`
+>
+> `src/Entity/Subcontent/SubcontentModel`
+
 ## Mapping
 
 ### List all bundles and check if a model exists
@@ -79,8 +95,8 @@ Use the `hook_entity_model_mapping()` hook to map your models.
 function mymodule_entity_model_mapping()
 {
     // Add mappings
-    $mapping['node_article'] = \Drupal\mymodule\Entity\Node\Article::class;
-    $mapping['subcontent_product'] = \Drupal\mymodule\Entity\Subcontent\Product::class;
+    $mapping['node.article'] = \Drupal\mymodule\Entity\Node\Article::class;
+    $mapping['subcontent.product'] = \Drupal\mymodule\Entity\Subcontent\Product::class;
 
     return $mapping;
 }
@@ -96,6 +112,49 @@ function mymodule_entity_model_mapping()
 }
 ```
 
+### Eck
+
+Eck is an awesome module. I prefer to rest my eck entities in a `src/Entity/Eck/` directory. However this means breaking from my own convention.
+
+To get around this you can create an **abstract** class that overrides how this module deduces the EntityType and Bundle from a namespace.
+
+```
+// src/Entity/Eck/EckModel.php
+<?php
+
+namespace Drupal\mymodule\Entity\Eck;
+
+use Drupal\eck\Entity\EckEntity;
+use Drupal\wmmodel\Entity\Interfaces\WmModelInterface;
+use Drupal\wmmodel\Entity\Traits\WmModel;
+
+abstract class EckModel extends EckEntity implements WmModelInterface
+{
+    use WmModel;
+
+    protected static function bundleDeduceRegex()
+    {
+        return '#/Entity/Eck/(.*?)/(.*?)$#';
+    }
+
+}
+```
+
+And then have your Eck models extend this class
+
+```
+// src/Entity/Eck/Subcontent/Product.php
+<?php
+
+namespace Drupal\mymodule\Entity\Eck\Subcontent;
+
+use Drupal\mymodule\Entity\Eck\EckModel;
+
+class Product extends EckModel
+{
+}
+```
+
 ### Altering mapped models
 
 The `hook_entity_model_mapping_alter` hook can be used to alter registered models by other modules.
@@ -104,7 +163,7 @@ The `hook_entity_model_mapping_alter` hook can be used to alter registered model
 function mymodule_entity_model_mapping_alter(&$mapping)
 {
     // Map a bundle "article" with entity type "node" to a custom class
-    $mapping['node_article'] = 'Drupal\mymodule\Entity\Node\Article';
+    $mapping['node.article'] = 'Drupal\mymodule\Entity\Node\Article';
 }
 ```
 
@@ -127,95 +186,18 @@ It makes more sense to have it at the Model.
  }
 ```
 
-### Custom controllers
+### Bundle-specific controllers
 
-Subscribe to `RoutingEvents::ALTER` and alter the `entity.node.canonical` route to use individual controllers per bundle.
-
-This is of course already possible without this module, but it's a fun combination!
+Team up this module with [wieni/wmcontroller](https://github.com/wieni/wmcontroller) and use bundle-specific controllers with models!
 
 ```
-<?php
-
-namespace Drupal\mymodule\Routing;
-
-use Symfony\Component\Routing\Route;
-use Symfony\Component\Routing\RouteCollection;
-use Drupal\Core\Routing\RoutingEvents;
-use Drupal\Core\Routing\RouteSubscriberBase;
-
-
-class CoreRoutes extends RouteSubscriberBase
-{
-    public static function getSubscribedEvents()
-    {
-        // Default implementation (weight 0) doesn't suffice to
-        // overwrite the defaults._controller of entity.taxonomy_term.canonical.
-        $events[RoutingEvents::ALTER] = ['onAlterRoutes', -9999];
-        return $events;
-    }
-    
-    protected function alterRoutes(RouteCollection $collection)
-    {
-        $route = $collection->get('entity.node.canonical');
-        $defaults = $route->getDefaults();
-        $defaults['_controller'] =
-            '\\Drupal\\mymodule\\Controller\\FrontController::show';
-        
-        $route->setDefaults($defaults);
-    }
-}
-```
-
-Then you create a frontcontroller that will delegate to a bundle-specific controller.
-
-```
-<?php
-
-namespace Drupal\mymodule\Controller;
-
-use Drupal\Core\Entity\EntityInterface;
-
-class FrontController
-{
-
-    /**
-     * A frontcontroller
-     *
-     * @param EntityInterface $node
-     * @param string $mode
-     * @return mixed
-     */
-    public function node(EntityInterface $entity, $mode = 'full')
-    {
-        $entityType = $this->camelize($entity->getEntityType()->id());
-        $bundle = $this->camelize($entity->bundle());
-        $controller = sprintf(
-            'Drupal\\mymodule\\Controller\\%s\\%s',
-            $entityType, $bundle
-        );
-        
-        // Instantiate controller
-        $controller = $controller::create(\Drupal::getContainer())
-
-        // Call show() method on the controller
-        return $controller->show($entity, $mode);
-    }
-
-    private function camelize($input, $separator = '_')
-    {
-        return str_replace($separator, '', ucwords($input, $separator));
-    }
-}
-```
-
-And finally your Bundle-specific controller.
-
-```
+// src/Controller/Node/ArticleController.php
 <?php
 
 namespace Drupal\mymodule\Controller\Node;
 
-use Drupal\Core\Controller\ControllerBase;
+use Drupal\wmcontroller\Controller\ControllerBase;
+use Drupal\mymodule\Entity\Node\Article;
 
 class ArticleController extends ControllerBase
 {

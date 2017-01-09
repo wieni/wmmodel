@@ -11,17 +11,22 @@ function wmmodel_drush_command()
 
 function drush_wmmodel_model_list()
 {
-    $entity_types = \Drupal::entityTypeManager()->getDefinitions();
-    if ($mapping = \Drupal::cache()->get('wmmodel.mapping')) {
+    if ($mapping = \Drupal::cache('wmmodel')->get('mapping')) {
         $mapping = $mapping->data ?: [];
     } else {
         $mapping = [];
     }
 
-    // Get a list of all bundles for node and eck_entity
+    /** @var \Drupal\wmmodel\Entity\EntityTypeBundleInfo $bundleInfo */
+    $bundleInfo = \Drupal::service('wmmodel.entity_type.bundle.info');
+
     $types = [];
-    $types = array_merge($types, _wmmodel_get_types($entity_types, 'node'));
-    $types = array_merge($types, _wmmodel_get_types($entity_types, 'eck_entity', true));
+    foreach ($bundleInfo->getAllBundleInfo() as $entityType => $bundles) {
+        foreach (array_keys($bundles) as $bundle) {
+            $bundle = \Doctrine\Common\Inflector\Inflector::singularize($bundle);
+            $types[] = "$entityType.$bundle";
+        }
+    }
 
     sort($types);
 
@@ -35,33 +40,3 @@ function drush_wmmodel_model_list()
         }
     }
 }
-
-function _wmmodel_get_types($entityTypes, $entityType, $ignore_parentName = false)
-{
-    $entity_manager = \Drupal::entityTypeManager();
-
-    $type = $entityTypes[$entityType . '_type'] ?? false;
-
-    if (!$type) {
-        return [];
-    }
-
-    // Get the existing bundles.
-    $bundles = $entity_manager->createHandlerInstance(
-        $type->getHandlerClass('storage'),
-        $type
-    )->loadMultiple();
-
-    $types = [];
-    foreach ($bundles as $bundle => $type) {
-        // check for sub bundles (eg with eck)
-        $types = array_merge($types, _wmmodel_get_types($entityTypes, $bundle));
-
-        if (!$ignore_parentName) {
-            $types[] = $entityType . '_' . $bundle;
-        }
-    }
-
-    return $types;
-}
-

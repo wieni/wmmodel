@@ -63,7 +63,7 @@ class ModelFinder
 
             list($type, $bundle) = call_user_func([$class, 'getModelInfo']);
 
-            $key = $type . '_' . $bundle;
+            $key = $type . '.' . $bundle;
             $models[$key] = $class;
         }
 
