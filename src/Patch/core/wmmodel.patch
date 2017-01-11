@@ -1,37 +1,135 @@
-diff --git a/core/lib/Drupal/Core/Entity/ContentEntityStorageBase.php b/core/lib/Drupal/Core/Entity/ContentEntityStorageBase.php
-index afdce40..12db30b 100644
---- a/core/lib/Drupal/Core/Entity/ContentEntityStorageBase.php
-+++ b/core/lib/Drupal/Core/Entity/ContentEntityStorageBase.php
-@@ -84,7 +84,12 @@ protected function doCreate(array $values) {
+diff --git a/lib/Drupal/Core/Entity/ContentEntityStorageBase.php b/lib/Drupal/Core/Entity/ContentEntityStorageBase.php
+index afdce40..f1ecfeb 100644
+--- a/lib/Drupal/Core/Entity/ContentEntityStorageBase.php
++++ b/lib/Drupal/Core/Entity/ContentEntityStorageBase.php
+@@ -62,6 +62,26 @@ abstract class ContentEntityStorageBase extends EntityStorageBase implements Con
+     );
+   }
+ 
++  public function getEntityClass($values = [], $bundle = false)
++  {
++      $bundle = $bundle ?? $this->getBundleFromValues($values);
++      if (!$bundle || !\Drupal::hasService('wmmodel.factory.model')) {
++          return parent::getEntityClass($values);
++      }
++      /** @var \Drupal\wmmodel\Factory\ModelFactory $modelFactory */
++      $modelFactory = \Drupal::service('wmmodel.factory.model');
++      return $modelFactory->getClassName($this->entityType, $bundle);
++  }
++
++  public function getBundleFromValues($values = [])
++  {
++      if (!$this->bundleKey) {
++          return null;
++      }
++
++      return $values[$this->bundleKey] ?? null;
++  }
++
+   /**
+    * {@inheritdoc}
+    */
+@@ -84,7 +104,8 @@ abstract class ContentEntityStorageBase extends EntityStorageBase implements Con
        }
        $bundle = $values[$this->bundleKey];
      }
 -    $entity = new $this->entityClass(array(), $this->entityTypeId, $bundle);
-+    if (\Drupal::hasService('wmmodel.factory.model')) {
-+      $modelFactory = \Drupal::service('wmmodel.factory.model');
-+      $entity = $modelFactory->createModel(array(), $this->entityType, $bundle);
-+    } else {
-+      $entity = new $this->entityClass(array(), $this->entityTypeId, $bundle);
-+    }
++    $entityClass = $this->getEntityClass([], $bundle);
++    $entity = new $entityClass(array(), $this->entityTypeId, $bundle);
      $this->initFieldValues($entity, $values);
      return $entity;
    }
-diff --git a/core/lib/Drupal/Core/Entity/Sql/SqlContentEntityStorage.php b/core/lib/Drupal/Core/Entity/Sql/SqlContentEntityStorage.php
-index 2ea450d..5b2373c 100644
---- a/core/lib/Drupal/Core/Entity/Sql/SqlContentEntityStorage.php
-+++ b/core/lib/Drupal/Core/Entity/Sql/SqlContentEntityStorage.php
-@@ -485,7 +485,13 @@ protected function mapFromStorageRecords(array $records, $load_from_revision = F
+diff --git a/lib/Drupal/Core/Entity/EntityStorageBase.php b/lib/Drupal/Core/Entity/EntityStorageBase.php
+index f583121..0b4c756 100644
+--- a/lib/Drupal/Core/Entity/EntityStorageBase.php
++++ b/lib/Drupal/Core/Entity/EntityStorageBase.php
+@@ -173,7 +173,7 @@ abstract class EntityStorageBase extends EntityHandlerBase implements EntityStor
+    * {@inheritdoc}
+    */
+   public function create(array $values = array()) {
+-    $entity_class = $this->entityClass;
++    $entity_class = $this->getEntityClass($values);
+     $entity_class::preCreate($this, $values);
+ 
+     // Assign a new UUID if there is none yet.
+@@ -293,8 +293,9 @@ abstract class EntityStorageBase extends EntityHandlerBase implements EntityStor
+    *   Associative array of query results, keyed on the entity ID.
+    */
+   protected function postLoad(array &$entities) {
+-    $entity_class = $this->entityClass;
+-    $entity_class::postLoad($this, $entities);
++    foreach ($this->groupByClassName($entities) as $entity_class => $bundleEntities) {
++      $entity_class::postLoad($this, $bundleEntities);
++    }
+     // Call hook_entity_load().
+     foreach ($this->moduleHandler()->getImplementations('entity_load') as $module) {
+       $function = $module . '_entity_load';
+@@ -307,7 +308,12 @@ abstract class EntityStorageBase extends EntityHandlerBase implements EntityStor
+     }
+   }
+ 
+-  /**
++    public function getEntityClass($values = [])
++    {
++        return $this->entityClass;
++    }
++
++    /**
+    * Maps from storage records to entity objects.
+    *
+    * @param array $records
+@@ -353,8 +359,9 @@ abstract class EntityStorageBase extends EntityHandlerBase implements EntityStor
+     }
+ 
+     // Allow code to run before deleting.
+-    $entity_class = $this->entityClass;
+-    $entity_class::preDelete($this, $keyed_entities);
++    foreach ($this->groupByClassName($keyed_entities) as $entity_class => $bundleEntities) {
++      $entity_class::preDelete($this, $bundleEntities);
++    }
+     foreach ($keyed_entities as $entity) {
+       $this->invokeHook('predelete', $entity);
+     }
+@@ -364,7 +371,9 @@ abstract class EntityStorageBase extends EntityHandlerBase implements EntityStor
+     $this->resetCache(array_keys($keyed_entities));
+ 
+     // Allow code to run after deleting.
+-    $entity_class::postDelete($this, $keyed_entities);
++    foreach ($this->groupByClassName($keyed_entities) as $entity_class => $bundleEntities) {
++      $entity_class::postDelete($this, $bundleEntities);
++    }
+     foreach ($keyed_entities as $entity) {
+       $this->invokeHook('delete', $entity);
+     }
+@@ -530,4 +539,17 @@ abstract class EntityStorageBase extends EntityHandlerBase implements EntityStor
+    */
+   abstract protected function getQueryServiceName();
+ 
++    /**
++     * @param array $entities
++     * @return array
++     */
++    protected function groupByClassName(array $entities): array
++    {
++        $entity_classes = [];
++        foreach ($entities as $id => $entity) {
++            $entity_classes[get_class($entity)][$id] = $entity;
++        }
++        return $entity_classes;
++    }
++
+ }
+diff --git a/lib/Drupal/Core/Entity/Sql/SqlContentEntityStorage.php b/lib/Drupal/Core/Entity/Sql/SqlContentEntityStorage.php
+index 2ea450d..38516e7 100644
+--- a/lib/Drupal/Core/Entity/Sql/SqlContentEntityStorage.php
++++ b/lib/Drupal/Core/Entity/Sql/SqlContentEntityStorage.php
+@@ -485,7 +485,8 @@ class SqlContentEntityStorage extends ContentEntityStorageBase implements SqlEnt
      foreach ($values as $id => $entity_values) {
        $bundle = $this->bundleKey ? $entity_values[$this->bundleKey][LanguageInterface::LANGCODE_DEFAULT] : FALSE;
        // Turn the record into an entity class.
 -      $entities[$id] = new $this->entityClass($entity_values, $this->entityTypeId, $bundle, array_keys($translations[$id]));
-+      if (\Drupal::hasService('wmmodel.factory.model')) {
-+        $modelFactory = \Drupal::service('wmmodel.factory.model');
-+        $entity = $modelFactory->createModel($entity_values, $this->entityType, $bundle, array_keys($translations[$id]));
-+      } else {
-+        $entity = new $this->entityClass($entity_values, $this->entityType->id(), $bundle, array_keys($translations[$id]));
-+      }
-+      $entities[$id] = $entity;
++      $entityClass = $this->getEntityClass($entity_values, $bundle);
++      $entities[$id] = new $entityClass($entity_values, $this->entityTypeId, $bundle, array_keys($translations[$id]));
      }
  
      return $entities;

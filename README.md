@@ -30,7 +30,7 @@ The patch will alter how Drupal creates an instance of entities so Storages will
     
     "extra": {
         "patches": {
-            "drupal/core": "https://cdn.rawgit.com/wieni/wmmodel/0.2.0/src/Patch/core/wmmodel.patch"
+            "drupal/core": "https://cdn.rawgit.com/wieni/wmmodel/0.2.1/src/Patch/core/wmmodel.patch"
         }
     }
 }

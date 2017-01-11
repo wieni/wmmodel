@@ -4,14 +4,13 @@ namespace Drupal\wmmodel\Factory;
 
 use Doctrine\Common\Inflector\Inflector;
 use Drupal\Core\Cache\CacheBackendInterface;
-use Drupal\Core\Entity\ContentEntityInterface;
 use Drupal\Core\Entity\EntityTypeInterface;
 
 class ModelFactory
 {
 
     /** @var array */
-    protected static $mapping;
+    protected static $mapping = [];
 
     /** @var CacheBackendInterface */
     protected $cacheBackend;
@@ -27,31 +26,25 @@ class ModelFactory
     }
 
     /**
-     * Creates an instance of the requested model
+     * Get the model class of an entity
      *
-     * @param array $values
-     * @param EntityTypeInterface $entity_type
-     * @param bool $bundle
-     * @param array $translations
-     * @return ContentEntityInterface
+     * @param EntityTypeInterface $entityType
+     * @param string $bundle
+     * @return string
      */
-    public function createModel(
-        array $values,
-        EntityTypeInterface $entity_type,
-        $bundle = false,
-        $translations = array()
-    ) {
-        $modelName = $entity_type->id() . '.' . Inflector::singularize($bundle);
+    public function getClassName(EntityTypeInterface $entityType, $bundle)
+    {
+        $modelName = $entityType->id() . '.' . Inflector::singularize($bundle);
 
-        // By default, use the given class
-        $className = $entity_type->getClass();
+        // By default, use the parent entity class
+        $className = $entityType->getClass();
 
         // If the model is mapped to a specific class, use that one instead
         if ($this->modelIsMapped($modelName)) {
-            $className = $this->getClassName($modelName);
+            $className = $this->getMappedClassName($modelName);
         }
 
-        return new $className($values, $entity_type->id(), $bundle, $translations);
+        return $className;
     }
 
     /**
@@ -60,7 +53,7 @@ class ModelFactory
      * @param $modelName
      * @return string
      */
-    public function getClassName($modelName)
+    private function getMappedClassName($modelName)
     {
         return static::$mapping[$modelName] ?? '';
     }
@@ -69,7 +62,7 @@ class ModelFactory
      * @param $modelName
      * @return bool
      */
-    public function modelIsMapped($modelName)
+    private function modelIsMapped($modelName)
     {
         return isset(static::$mapping[$modelName]);
     }
@@ -77,11 +70,10 @@ class ModelFactory
     /**
      * Load the mapping from cache
      */
-    protected function loadMapping()
+    private function loadMapping()
     {
-        if (empty(static::$mapping)) {
-            $mapping = $this->cacheBackend->get('mapping')->data;
-            static::$mapping = $mapping;
+        if (empty(static::$mapping) && $cache = $this->cacheBackend->get('mapping')) {
+            static::$mapping = $cache->data;
         }
     }
 
