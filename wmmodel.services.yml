@@ -16,3 +16,8 @@ services:
         arguments: ['@cache.wmmodel']
     wmmodel.service.finder:
         class: Drupal\wmmodel\Service\ModelFinder
+    wmmodel.model.drop:
+        class: Drupal\wmmodel\TwigExtension\ModelDropExtension
+        arguments:
+        tags:
+          - { name: twig.extension }
