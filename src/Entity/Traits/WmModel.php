@@ -34,20 +34,6 @@ trait WmModel
     }
 
     /**
-     * Get the cache tags of this entity
-     * and also the cache tags of referenced entities
-     *
-     * @inheritdoc
-     */
-    public function getCacheTags()
-    {
-        $referenced_tags = $this->getReferencedEntitiesCacheTags();
-        $tags = array_merge(parent::getCacheTags(), $referenced_tags);
-
-        return array_unique($tags);
-    }
-
-    /**
      * Get the entityType and bundle of this model
      *
      * @return array
