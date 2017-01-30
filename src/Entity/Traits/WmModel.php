@@ -107,7 +107,7 @@ trait WmModel
      * Get cache keys of referenced entities without instantiating them
      * @return string[]
      */
-    protected function getReferencedEntitiesCacheTags()
+    public function getReferencedEntitiesCacheTags()
     {
         $referenced_tags = [];
         foreach ($this->getFields() as $field_items) {
