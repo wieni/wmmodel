@@ -5,6 +5,7 @@ namespace Drupal\wmmodel\Entity\Traits;
 use Doctrine\Common\Inflector\Inflector;
 use Drupal\Core\Entity\Exception\NoCorrespondingEntityClassException;
 use Drupal\Core\Entity\Plugin\DataType\EntityReference;
+use Drupal\taxonomy\Entity\Term;
 
 trait WmModel
 {
@@ -25,7 +26,8 @@ trait WmModel
             }
 
             // Set the bundle type
-            $values['type'] = $bundleName;
+            $type = (is_subclass_of(static::class, Term::class)) ? 'vid' : 'type';
+            $values[$type] = $bundleName;
 
             return \Drupal::entityTypeManager()
                 ->getStorage($entityType)
