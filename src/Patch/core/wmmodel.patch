@@ -1,8 +1,8 @@
 diff --git a/lib/Drupal/Core/Entity/ContentEntityStorageBase.php b/lib/Drupal/Core/Entity/ContentEntityStorageBase.php
-index afdce40..f1ecfeb 100644
+index 9d6b8d6..a3fe582 100644
 --- a/lib/Drupal/Core/Entity/ContentEntityStorageBase.php
 +++ b/lib/Drupal/Core/Entity/ContentEntityStorageBase.php
-@@ -62,6 +62,26 @@ abstract class ContentEntityStorageBase extends EntityStorageBase implements Con
+@@ -62,6 +62,26 @@ public static function createInstance(ContainerInterface $container, EntityTypeI
      );
    }
  
@@ -29,30 +29,30 @@ index afdce40..f1ecfeb 100644
    /**
     * {@inheritdoc}
     */
-@@ -84,7 +104,8 @@ abstract class ContentEntityStorageBase extends EntityStorageBase implements Con
+@@ -84,7 +104,8 @@ protected function doCreate(array $values) {
        }
        $bundle = $values[$this->bundleKey];
      }
--    $entity = new $this->entityClass(array(), $this->entityTypeId, $bundle);
+-    $entity = new $this->entityClass([], $this->entityTypeId, $bundle);
 +    $entityClass = $this->getEntityClass([], $bundle);
 +    $entity = new $entityClass(array(), $this->entityTypeId, $bundle);
      $this->initFieldValues($entity, $values);
      return $entity;
    }
 diff --git a/lib/Drupal/Core/Entity/EntityStorageBase.php b/lib/Drupal/Core/Entity/EntityStorageBase.php
-index f583121..0b4c756 100644
+index 99698df..6915465 100644
 --- a/lib/Drupal/Core/Entity/EntityStorageBase.php
 +++ b/lib/Drupal/Core/Entity/EntityStorageBase.php
-@@ -173,7 +173,7 @@ abstract class EntityStorageBase extends EntityHandlerBase implements EntityStor
+@@ -173,7 +173,7 @@ protected function invokeHook($hook, EntityInterface $entity) {
     * {@inheritdoc}
     */
-   public function create(array $values = array()) {
+   public function create(array $values = []) {
 -    $entity_class = $this->entityClass;
 +    $entity_class = $this->getEntityClass($values);
      $entity_class::preCreate($this, $values);
  
      // Assign a new UUID if there is none yet.
-@@ -293,8 +293,9 @@ abstract class EntityStorageBase extends EntityHandlerBase implements EntityStor
+@@ -293,8 +293,9 @@ public function loadMultiple(array $ids = NULL) {
     *   Associative array of query results, keyed on the entity ID.
     */
    protected function postLoad(array &$entities) {
@@ -64,7 +64,7 @@ index f583121..0b4c756 100644
      // Call hook_entity_load().
      foreach ($this->moduleHandler()->getImplementations('entity_load') as $module) {
        $function = $module . '_entity_load';
-@@ -307,7 +308,12 @@ abstract class EntityStorageBase extends EntityHandlerBase implements EntityStor
+@@ -307,7 +308,12 @@ protected function postLoad(array &$entities) {
      }
    }
  
@@ -78,7 +78,7 @@ index f583121..0b4c756 100644
     * Maps from storage records to entity objects.
     *
     * @param array $records
-@@ -353,8 +359,9 @@ abstract class EntityStorageBase extends EntityHandlerBase implements EntityStor
+@@ -353,8 +359,9 @@ public function delete(array $entities) {
      }
  
      // Allow code to run before deleting.
@@ -90,7 +90,7 @@ index f583121..0b4c756 100644
      foreach ($keyed_entities as $entity) {
        $this->invokeHook('predelete', $entity);
      }
-@@ -364,7 +371,9 @@ abstract class EntityStorageBase extends EntityHandlerBase implements EntityStor
+@@ -364,7 +371,9 @@ public function delete(array $entities) {
      $this->resetCache(array_keys($keyed_entities));
  
      // Allow code to run after deleting.
@@ -101,7 +101,7 @@ index f583121..0b4c756 100644
      foreach ($keyed_entities as $entity) {
        $this->invokeHook('delete', $entity);
      }
-@@ -530,4 +539,17 @@ abstract class EntityStorageBase extends EntityHandlerBase implements EntityStor
+@@ -530,4 +539,17 @@ public function getAggregateQuery($conjunction = 'AND') {
     */
    abstract protected function getQueryServiceName();
  
@@ -120,10 +120,10 @@ index f583121..0b4c756 100644
 +
  }
 diff --git a/lib/Drupal/Core/Entity/Sql/SqlContentEntityStorage.php b/lib/Drupal/Core/Entity/Sql/SqlContentEntityStorage.php
-index 2ea450d..38516e7 100644
+index 6df1af0..6a4a6fb 100644
 --- a/lib/Drupal/Core/Entity/Sql/SqlContentEntityStorage.php
 +++ b/lib/Drupal/Core/Entity/Sql/SqlContentEntityStorage.php
-@@ -485,7 +485,8 @@ class SqlContentEntityStorage extends ContentEntityStorageBase implements SqlEnt
+@@ -485,7 +485,8 @@ protected function mapFromStorageRecords(array $records, $load_from_revision = F
      foreach ($values as $id => $entity_values) {
        $bundle = $this->bundleKey ? $entity_values[$this->bundleKey][LanguageInterface::LANGCODE_DEFAULT] : FALSE;
        // Turn the record into an entity class.
