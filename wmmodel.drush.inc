@@ -23,7 +23,7 @@ function drush_wmmodel_model_list()
     $types = [];
     foreach ($bundleInfo->getAllBundleInfo() as $entityType => $bundles) {
         foreach (array_keys($bundles) as $bundle) {
-            $bundle = \Doctrine\Common\Inflector\Inflector::singularize($bundle);
+            $bundle = $bundle;
             $types[] = "$entityType.$bundle";
         }
     }

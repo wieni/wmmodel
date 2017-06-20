@@ -34,7 +34,7 @@ class ModelFactory
      */
     public function getClassName(EntityTypeInterface $entityType, $bundle)
     {
-        $modelName = $entityType->id() . '.' . Inflector::singularize($bundle);
+        $modelName = $entityType->id() . '.' . $bundle;
 
         // By default, use the parent entity class
         $className = $entityType->getClass();

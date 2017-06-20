@@ -53,7 +53,7 @@ trait WmModel
 
         if ($match) {
             $entityType = static::snake($match[1]);
-            $bundleName = Inflector::singularize(static::snake($match[2]));
+            $bundleName = static::snake($match[2]);
         }
 
         // Allow for modules to overwrite h
