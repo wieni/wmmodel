@@ -3,7 +3,6 @@
 namespace Drupal\wmmodel\Session;
 
 use Drupal\Core\Session\AccountProxy as DrupalAccountProxy;
-use Drupal\Core\Session\AnonymousUserSession;
 use Drupal\Core\Session\AccountInterface;
 
 class AccountProxy extends DrupalAccountProxy
