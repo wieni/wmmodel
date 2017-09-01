@@ -3,7 +3,6 @@
 namespace Drupal\wmmodel\Session;
 
 use Drupal\Core\Session\AccountProxy as DrupalAccountProxy;
-use Drupal\Core\Session\AnonymousUserSession;
 use Drupal\Core\Session\AccountInterface;
 
 class AccountProxy extends DrupalAccountProxy
@@ -28,13 +27,9 @@ class AccountProxy extends DrupalAccountProxy
     public function getAccount()
     {
         if (!isset($this->fullUser)) {
-            $this->fullUser = new AnonymousUserSession();
-            if ($this->id) {
-                $user = $this->loadUserEntity($this->id);
-                $this->fullUser = $user;
-                $this->setAccount($user);
-            }
-
+            $user = $this->loadUserEntity($this->id);
+            $this->fullUser = $user;
+            $this->setAccount($user);
             $this->account = $this->fullUser;
         }
 
