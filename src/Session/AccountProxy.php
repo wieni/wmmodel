@@ -28,13 +28,9 @@ class AccountProxy extends DrupalAccountProxy
     public function getAccount()
     {
         if (!isset($this->fullUser)) {
-            $this->fullUser = new AnonymousUserSession();
-            if ($this->id) {
-                $user = $this->loadUserEntity($this->id);
-                $this->fullUser = $user;
-                $this->setAccount($user);
-            }
-
+            $user = $this->loadUserEntity($this->id);
+            $this->fullUser = $user;
+            $this->setAccount($user);
             $this->account = $this->fullUser;
         }
 
