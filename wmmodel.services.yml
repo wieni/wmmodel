@@ -1,10 +1,4 @@
 services:
-    cache.wmmodel:
-        class: Drupal\Core\Cache\CacheBackendInterface
-        tags:
-            - { name: cache.bin }
-        factory: cache_factory:get
-        arguments: [wmmodel]
     controller_resolver:
         class: Drupal\wmmodel\Controller\ControllerResolver
         arguments: ['@psr7.http_message_factory', '@class_resolver']
@@ -13,6 +7,6 @@ services:
         parent: entity_type.bundle.info
     wmmodel.factory.model:
         class:  Drupal\wmmodel\Factory\ModelFactory
-        arguments: ['@cache.wmmodel']
+        arguments: ['@state']
     wmmodel.service.finder:
         class: Drupal\wmmodel\Service\ModelFinder

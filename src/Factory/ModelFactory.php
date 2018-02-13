@@ -2,9 +2,8 @@
 
 namespace Drupal\wmmodel\Factory;
 
-use Doctrine\Common\Inflector\Inflector;
-use Drupal\Core\Cache\CacheBackendInterface;
 use Drupal\Core\Entity\EntityTypeInterface;
+use Drupal\Core\State\StateInterface;
 
 class ModelFactory
 {
@@ -12,16 +11,16 @@ class ModelFactory
     /** @var array */
     protected static $mapping = [];
 
-    /** @var CacheBackendInterface */
-    protected $cacheBackend;
+    /** @var \Drupal\Core\State\StateInterface */
+    protected $state;
 
     /**
      * ModelFactory constructor.
-     * @param CacheBackendInterface $cacheBackend
+     * @param \Drupal\Core\State\StateInterface $state
      */
-    public function __construct(CacheBackendInterface $cacheBackend)
+    public function __construct(StateInterface $state)
     {
-        $this->cacheBackend = $cacheBackend;
+        $this->state = $state;
         $this->loadMapping();
     }
 
@@ -68,12 +67,12 @@ class ModelFactory
     }
 
     /**
-     * Load the mapping from cache
+     * Load the mapping from state
      */
     private function loadMapping()
     {
-        if (empty(static::$mapping) && $cache = $this->cacheBackend->get('mapping')) {
-            static::$mapping = $cache->data;
+        if (empty(static::$mapping) && $mapping = $this->state->get('wmmodel', [])) {
+            static::$mapping = $mapping;
         }
     }
 

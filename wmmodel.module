@@ -16,5 +16,5 @@ function wmmodel_rebuild()
     // Allow modules to alter the assigned mappings.
     \Drupal::moduleHandler()->alter('entity_model_mapping', $mapping);
     // Cache the mapping
-    \Drupal::cache('wmmodel')->set('mapping', $mapping);
+    \Drupal::state()->set('wmmodel', $mapping);
 }

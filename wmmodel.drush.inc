@@ -11,11 +11,7 @@ function wmmodel_drush_command()
 
 function drush_wmmodel_model_list()
 {
-    if ($mapping = \Drupal::cache('wmmodel')->get('mapping')) {
-        $mapping = $mapping->data ?: [];
-    } else {
-        $mapping = [];
-    }
+    $mapping = \Drupal::state()->get('wmmodel', []);
 
     /** @var \Drupal\wmmodel\Entity\EntityTypeBundleInfo $bundleInfo */
     $bundleInfo = \Drupal::service('wmmodel.entity_type.bundle.info');
@@ -23,7 +19,6 @@ function drush_wmmodel_model_list()
     $types = [];
     foreach ($bundleInfo->getAllBundleInfo() as $entityType => $bundles) {
         foreach (array_keys($bundles) as $bundle) {
-            $bundle = $bundle;
             $types[] = "$entityType.$bundle";
         }
     }
