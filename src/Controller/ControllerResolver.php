@@ -43,18 +43,11 @@ class ControllerResolver extends DrupalControllerResolver
             elseif ($param->getClass() && ($param->getClass()->name == RouteMatchInterface::class || is_subclass_of($param->getClass()->name, RouteMatchInterface::class))) {
                 $arguments[] = RouteMatch::createFromRequest($request);
             }
+            elseif ($WmModelEnabled && $this->addModel($arguments, $attributes, $param)) {
+                // noop
+            }
             elseif ($param->isDefaultValueAvailable()) {
                 $arguments[] = $param->getDefaultValue();
-            }
-            // Also check by WmModel typehint
-            elseif ($WmModelEnabled && $param->getClass()) {
-                foreach ($attributes as $key => $attribute) {
-                    if ($this->isWmModel($attribute) && $this->isSubclass($attribute, $param->getClass()->name)) {
-                        $arguments[] = $attribute;
-                        // Remove from attributes so it can't give the same argument multiple times
-                        unset($attributes[$key]);
-                    }
-                }
             }
             else {
                 if (is_array($controller)) {
@@ -94,5 +87,23 @@ class ControllerResolver extends DrupalControllerResolver
     protected function isWmModel($object)
     {
         return is_object($object) && is_subclass_of($object, WmModelInterface::class);
+    }
+
+    private function addModel(&$arguments, &$attributes, \ReflectionParameter $param)
+    {
+        if (!$param->getClass()) {
+            return false;
+        }
+
+        foreach ($attributes as $key => $attribute) {
+            if ($this->isWmModel($attribute) && $this->isSubclass($attribute, $param->getClass()->name)) {
+                $arguments[] = $attribute;
+                // Remove from attributes so it can't give the same argument multiple times
+                unset($attributes[$key]);
+                return true;
+            }
+        }
+
+        return false;
     }
 }
