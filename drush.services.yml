@@ -1,0 +1,6 @@
+services:
+  wmmodel.commands:
+    class: \Drupal\wmmodel\Commands\WmModelCommands
+    arguments: ['@wmmodel.cli']
+    tags:
+      - { name: drush.command }
