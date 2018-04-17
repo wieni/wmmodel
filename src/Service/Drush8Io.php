@@ -2,6 +2,8 @@
 
 namespace Drupal\wmmodel\Service;
 
+use Psr\Log\LogLevel;
+
 /**
  * Class Drush8Io.
  *
@@ -10,19 +12,23 @@ namespace Drupal\wmmodel\Service;
  */
 class Drush8Io
 {
-    public function confirm($text) {
+    public function confirm($text)
+    {
         return drush_confirm($text);
     }
 
-    public function success($text) {
-        drush_log($text, LogLevel::SUCCESS);
+    public function success($text)
+    {
+        drush_log($text, LogLevel::INFO);
     }
 
-    public function error($text) {
+    public function error($text)
+    {
         drush_log($text, LogLevel::ERROR);
     }
 
-    public function text($text) {
+    public function text($text)
+    {
         drush_log($text, LogLevel::NOTICE);
     }
 }
