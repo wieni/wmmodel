@@ -10,5 +10,12 @@
     ],
     "minimum-stability": "dev",
     "prefer-stable": true,
-    "type": "drupal-module"
+    "type": "drupal-module",
+    "extra": {
+        "drush": {
+            "services": {
+                "drush.services.yml": "^9"
+            }
+        }
+    }
 }
