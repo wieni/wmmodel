@@ -7,7 +7,7 @@ services:
         parent: entity_type.bundle.info
     wmmodel.factory.model:
         class:  Drupal\wmmodel\Factory\ModelFactory
-        arguments: ['@state']
+        arguments: ['@state', '@module_handler']
     wmmodel.service.finder:
         class: Drupal\wmmodel\Service\ModelFinder
     wmmodel.cli:
