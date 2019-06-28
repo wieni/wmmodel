@@ -50,6 +50,10 @@ class ModelFinder
             $class = preg_replace('/\.php$/', '', str_replace($dir . '/', '', $match[0]));
             $class = $namespace . str_replace('/', '\\', $class);
 
+            if (!class_exists($class)) {
+                continue;
+            }
+
             $ref = new ReflectionClass($class);
 
             // Skip if not isInstantiable or ContentEntityInterface
