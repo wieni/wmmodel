@@ -3,24 +3,25 @@
 namespace Drupal\wmmodel\Factory;
 
 use Drupal\Core\Entity\EntityTypeInterface;
+use Drupal\Core\Extension\ModuleHandlerInterface;
 use Drupal\Core\State\StateInterface;
 
 class ModelFactory
 {
-
     /** @var array */
     protected static $mapping = [];
 
-    /** @var \Drupal\Core\State\StateInterface */
+    /** @var StateInterface */
     protected $state;
+    /** @var ModuleHandlerInterface */
+    protected $moduleHandler;
 
-    /**
-     * ModelFactory constructor.
-     * @param \Drupal\Core\State\StateInterface $state
-     */
-    public function __construct(StateInterface $state)
-    {
+    public function __construct(
+        StateInterface $state,
+        ModuleHandlerInterface $moduleHandler
+    ) {
         $this->state = $state;
+        $this->moduleHandler = $moduleHandler;
         $this->loadMapping();
     }
 
@@ -44,6 +45,21 @@ class ModelFactory
         }
 
         return $className;
+    }
+
+    /**
+     * Load the mapping from state
+     */
+    public function rebuildMapping()
+    {
+        // Fetch mappings from other modules.
+        $mapping = $this->moduleHandler->invokeAll('entity_model_mapping');
+        // Allow modules to alter the assigned mappings.
+        $this->moduleHandler->alter('entity_model_mapping', $mapping);
+        // Cache the mapping
+        $this->state->set('wmmodel', $mapping);
+        // Cache the mapping using a static variable
+        static::$mapping = $mapping;
     }
 
     /**
