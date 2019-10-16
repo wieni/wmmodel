@@ -1,7 +1,4 @@
 services:
-    controller_resolver:
-        class: Drupal\wmmodel\Controller\ControllerResolver
-        arguments: ['@psr7.http_message_factory', '@class_resolver']
     wmmodel.entity_type.bundle.info:
         class: Drupal\wmmodel\Entity\EntityTypeBundleInfo
         parent: entity_type.bundle.info
@@ -10,3 +7,5 @@ services:
         arguments: ['@state', '@module_handler']
     wmmodel.service.finder:
         class: Drupal\wmmodel\Service\ModelFinder
+    wmmodel.argument_resolver:
+        class: Drupal\wmmodel\Controller\ArgumentResolver\ModelValueResolver
