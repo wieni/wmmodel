@@ -1,5 +1,6 @@
 {
     "name": "wieni/wmmodel",
+    "type": "drupal-module",
     "description": "A convenient way to manage bundle-specific code in Drupal 8.",
     "license": "MIT",
     "authors": [
@@ -8,14 +9,13 @@
             "email": "info@wieni.be"
         }
     ],
-    "minimum-stability": "dev",
-    "prefer-stable": true,
-    "type": "drupal-module",
     "extra": {
         "drush": {
             "services": {
                 "drush.services.yml": "^9"
             }
         }
-    }
+    },
+    "minimum-stability": "dev",
+    "prefer-stable": true
 }
