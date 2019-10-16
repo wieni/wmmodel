@@ -10,6 +10,3 @@ services:
         arguments: ['@state', '@module_handler']
     wmmodel.service.finder:
         class: Drupal\wmmodel\Service\ModelFinder
-    wmmodel.cli:
-        class: Drupal\wmmodel\Service\CliService
-        arguments: ['@wmmodel.entity_type.bundle.info', '@state']

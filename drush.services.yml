@@ -1,6 +1,8 @@
 services:
   wmmodel.commands:
     class: \Drupal\wmmodel\Commands\WmModelCommands
-    arguments: ['@wmmodel.cli']
+    arguments:
+      - '@wmmodel.entity_type.bundle.info'
+      - '@state'
     tags:
       - { name: drush.command }
