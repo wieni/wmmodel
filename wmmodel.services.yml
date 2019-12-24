@@ -1,10 +1,12 @@
 services:
     wmmodel.factory.model:
-        class:  Drupal\wmmodel\Factory\ModelFactory
-        arguments: ['@state', '@module_handler']
-
-    wmmodel.service.finder:
-        class: Drupal\wmmodel\Service\ModelFinder
+        class: Drupal\wmmodel\Factory\ModelFactory
+        arguments:
+            - '@plugin.manager.wmmodel.model'
 
     wmmodel.argument_resolver:
         class: Drupal\wmmodel\Controller\ArgumentResolver\ModelValueResolver
+
+    plugin.manager.wmmodel.model:
+        class: Drupal\wmmodel\ModelPluginManager
+        parent: default_plugin_manager

@@ -2,9 +2,10 @@
 
 namespace Drupal\wmmodel\Commands;
 
+use Drupal\Core\Entity\ContentEntityTypeInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
-use Drupal\Core\State\StateInterface;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
+use Drupal\wmmodel\ModelPluginManager;
 use Drush\Commands\DrushCommands;
 
 class WmModelCommands extends DrushCommands
@@ -13,15 +14,15 @@ class WmModelCommands extends DrushCommands
 
     /** @var EntityTypeManagerInterface */
     protected $entityTypeManager;
-    /** @var StateInterface */
-    protected $state;
+    /** @var ModelPluginManager */
+    protected $pluginManager;
 
     public function __construct(
         EntityTypeManagerInterface $entityTypeManager,
-        StateInterface $state
+        ModelPluginManager $pluginManager
     ) {
         $this->entityTypeManager = $entityTypeManager;
-        $this->state = $state;
+        $this->pluginManager = $pluginManager;
     }
 
     /**
@@ -32,11 +33,12 @@ class WmModelCommands extends DrushCommands
      */
     public function listModels()
     {
-        $mapping = $this->state->get('wmmodel', []);
-        $types = [];
-
-        foreach ($this->entityTypeManager->getDefinitions() as $type => $entityType) {
+        foreach ($this->entityTypeManager->getDefinitions() as $entityType) {
             if (!$bundleEntityType = $entityType->getBundleEntityType()) {
+                continue;
+            }
+
+            if (!$entityType instanceof ContentEntityTypeInterface) {
                 continue;
             }
 
@@ -46,19 +48,20 @@ class WmModelCommands extends DrushCommands
                 ->execute();
 
             foreach ($bundles as $bundle) {
-                $types[] = "$type.{$bundle}";
-            }
-        }
+                $id = implode('.', [$entityType->id(), $bundle]);
 
-        sort($types);
+                if ($this->pluginManager->hasDefinition($id)) {
+                    $message = $this->t('Model "@model" is mapped against "@mapping".', [
+                        '@model' => $id,
+                        '@mapping' => $this->pluginManager->getDefinition($id)['class'],
+                    ]);
+                } else {
+                    $message = $this->t('Model "@model" is not mapped.', [
+                        '@model' => $id,
+                    ]);
+                }
 
-        foreach ($types as $modelKey) {
-            $map = $mapping[$modelKey] ?? '';
-
-            if (!$map) {
-                $this->io()->text($this->t('Model "@model" is not mapped.', ['@model' => $modelKey]));
-            } else {
-                $this->io()->text($this->t('Model "@model" is mapped against "@mapping".', ['@model' => $modelKey, '@mapping' => $map]));
+                $this->io()->text($message);
             }
         }
     }

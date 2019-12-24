@@ -1,6 +1,0 @@
-<?php
-
-function wmmodel_rebuild()
-{
-    \Drupal::service('wmmodel.factory.model')->rebuildMapping();
-}

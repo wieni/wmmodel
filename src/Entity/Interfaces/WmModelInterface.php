@@ -2,7 +2,8 @@
 
 namespace Drupal\wmmodel\Entity\Interfaces;
 
-interface WmModelInterface
+use Drupal\Core\Entity\ContentEntityInterface;
+
+interface WmModelInterface extends ContentEntityInterface
 {
-    public static function getModelInfo();
 }

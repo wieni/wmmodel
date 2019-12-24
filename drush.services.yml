@@ -3,6 +3,6 @@ services:
         class: Drupal\wmmodel\Commands\WmModelCommands
         arguments:
             - '@entity_type.manager'
-            - '@state'
+            - '@plugin.manager.wmmodel.model'
         tags:
             - { name: drush.command }

@@ -2,81 +2,36 @@
 
 namespace Drupal\wmmodel\Factory;
 
+use Drupal\Component\Plugin\Exception\PluginNotFoundException;
 use Drupal\Core\Entity\EntityTypeInterface;
-use Drupal\Core\Extension\ModuleHandlerInterface;
-use Drupal\Core\State\StateInterface;
+use Drupal\wmmodel\ModelPluginManager;
 
-class ModelFactory
+class ModelFactory implements ModelFactoryInterface
 {
-    /** @var array */
-    protected static $mapping = [];
-
-    /** @var StateInterface */
-    protected $state;
-    /** @var ModuleHandlerInterface */
-    protected $moduleHandler;
+    /** @var ModelPluginManager */
+    protected $pluginManager;
 
     public function __construct(
-        StateInterface $state,
-        ModuleHandlerInterface $moduleHandler
+        ModelPluginManager $pluginManager
     ) {
-        $this->state = $state;
-        $this->moduleHandler = $moduleHandler;
-        $this->loadMapping();
+        $this->pluginManager = $pluginManager;
     }
 
-    /** Get the model class of an entity */
-    public function getClassName(EntityTypeInterface $entityType, $bundle)
+    public function getClassName(EntityTypeInterface $entityType, string $bundle): string
     {
-        $modelName = $entityType->id() . '.' . $bundle;
-
-        // By default, use the parent entity class
-        $className = $entityType->getClass();
-
-        // If the model is mapped to a specific class, use that one instead
-        if ($this->modelIsMapped($modelName)) {
-            $className = $this->getMappedClassName($modelName);
+        try {
+            $id = implode('.', [$entityType->id(), $bundle]);
+            $definition = $this->pluginManager->getDefinition($id);
+        } catch (PluginNotFoundException $e) {
+            // By default, use the parent entity class
+            return $entityType->getClass();
         }
 
-        return $className;
+        return $definition['class'];
     }
 
-    /** Load the mapping from state */
-    public function rebuildMapping()
+    public function rebuildMapping(): void
     {
-        // Fetch mappings from other modules.
-        $mapping = $this->moduleHandler->invokeAll('entity_model_mapping');
-        // Allow modules to alter the assigned mappings.
-        $this->moduleHandler->alter('entity_model_mapping', $mapping);
-        // Cache the mapping
-        $this->state->set('wmmodel', $mapping);
-        // Cache the mapping using a static variable
-        static::$mapping = $mapping;
-    }
-
-    /**
-     * Get the class for a model
-     *
-     * @return string
-     */
-    private function getMappedClassName($modelName)
-    {
-        return static::$mapping[$modelName] ?? '';
-    }
-
-    /**
-     * @return bool
-     */
-    private function modelIsMapped($modelName)
-    {
-        return isset(static::$mapping[$modelName]);
-    }
-
-    /** Load the mapping from state */
-    private function loadMapping()
-    {
-        if (empty(static::$mapping) && $mapping = $this->state->get('wmmodel', [])) {
-            static::$mapping = $mapping;
-        }
+        $this->pluginManager->clearCachedDefinitions();
     }
 }

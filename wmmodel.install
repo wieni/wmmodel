@@ -1,0 +1,9 @@
+<?php
+
+/**
+ * Remove old class mapping from state
+ */
+function wmmodel_update_8001()
+{
+    \Drupal::state()->delete('wmmodel');
+}
