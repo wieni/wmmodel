@@ -28,10 +28,4 @@ class ModelValueResolver implements ArgumentValueResolverInterface
             }
         }
     }
-
-    protected function isSameOrSubClass(string $className, string $otherClassName): bool
-    {
-        return $className === $otherClassName
-            || is_subclass_of($className, $otherClassName);
-    }
 }
