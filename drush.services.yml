@@ -2,7 +2,7 @@ services:
   wmmodel.commands:
     class: \Drupal\wmmodel\Commands\WmModelCommands
     arguments:
-      - '@wmmodel.entity_type.bundle.info'
+      - '@entity_type.manager'
       - '@state'
     tags:
       - { name: drush.command }

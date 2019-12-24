@@ -2,25 +2,25 @@
 
 namespace Drupal\wmmodel\Commands;
 
+use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\State\StateInterface;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
-use Drupal\wmmodel\Entity\EntityTypeBundleInfo;
 use Drush\Commands\DrushCommands;
 
 class WmModelCommands extends DrushCommands
 {
     use StringTranslationTrait;
 
-    /** @var EntityTypeBundleInfo */
-    private $bundleInfo;
+    /** @var EntityTypeManagerInterface */
+    protected $entityTypeManager;
     /** @var StateInterface */
-    private $state;
+    protected $state;
 
     public function __construct(
-        EntityTypeBundleInfo $bundleInfo,
+        EntityTypeManagerInterface $entityTypeManager,
         StateInterface $state
     ) {
-        $this->bundleInfo = $bundleInfo;
+        $this->entityTypeManager = $entityTypeManager;
         $this->state = $state;
     }
 
@@ -33,11 +33,20 @@ class WmModelCommands extends DrushCommands
     public function listModels()
     {
         $mapping = $this->state->get('wmmodel', []);
-
         $types = [];
-        foreach ($this->bundleInfo->getAllBundleInfo() as $entityType => $bundles) {
-            foreach (array_keys($bundles) as $bundle) {
-                $types[] = "$entityType.$bundle";
+
+        foreach ($this->entityTypeManager->getDefinitions() as $type => $entityType) {
+            if (!$bundleEntityType = $entityType->getBundleEntityType()) {
+                continue;
+            }
+
+            $bundles = $this->entityTypeManager
+                ->getStorage($bundleEntityType)
+                ->getQuery()
+                ->execute();
+
+            foreach ($bundles as $bundle) {
+                $types[] = "$type.{$bundle}";
             }
         }
 

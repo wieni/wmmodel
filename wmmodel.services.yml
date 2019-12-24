@@ -1,7 +1,4 @@
 services:
-    wmmodel.entity_type.bundle.info:
-        class: Drupal\wmmodel\Entity\EntityTypeBundleInfo
-        parent: entity_type.bundle.info
     wmmodel.factory.model:
         class:  Drupal\wmmodel\Factory\ModelFactory
         arguments: ['@state', '@module_handler']
