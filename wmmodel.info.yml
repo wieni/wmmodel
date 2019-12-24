@@ -2,6 +2,3 @@ name: Wieni Model
 type: module
 core: 8.x
 package: Wieni
-dependencies:
-  - eck
-  - node
