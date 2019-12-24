@@ -30,6 +30,17 @@ class ModelFactory implements ModelFactoryInterface
         return $definition['class'];
     }
 
+    public function getEntityTypeAndBundle(string $className): ?array
+    {
+        foreach ($this->pluginManager->getDefinitions() as $definition) {
+            if ($definition['class'] === $className) {
+                return [$definition['entity_type'], $definition['bundle']];
+            }
+        }
+
+        return null;
+    }
+
     public function rebuildMapping(): void
     {
         $this->pluginManager->clearCachedDefinitions();
