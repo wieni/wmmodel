@@ -25,13 +25,7 @@ class ModelFactory
         $this->loadMapping();
     }
 
-    /**
-     * Get the model class of an entity
-     *
-     * @param EntityTypeInterface $entityType
-     * @param string $bundle
-     * @return string
-     */
+    /** Get the model class of an entity */
     public function getClassName(EntityTypeInterface $entityType, $bundle)
     {
         $modelName = $entityType->id() . '.' . $bundle;
@@ -47,9 +41,7 @@ class ModelFactory
         return $className;
     }
 
-    /**
-     * Load the mapping from state
-     */
+    /** Load the mapping from state */
     public function rebuildMapping()
     {
         // Fetch mappings from other modules.
@@ -65,7 +57,6 @@ class ModelFactory
     /**
      * Get the class for a model
      *
-     * @param $modelName
      * @return string
      */
     private function getMappedClassName($modelName)
@@ -74,7 +65,6 @@ class ModelFactory
     }
 
     /**
-     * @param $modelName
      * @return bool
      */
     private function modelIsMapped($modelName)
@@ -82,14 +72,11 @@ class ModelFactory
         return isset(static::$mapping[$modelName]);
     }
 
-    /**
-     * Load the mapping from state
-     */
+    /** Load the mapping from state */
     private function loadMapping()
     {
         if (empty(static::$mapping) && $mapping = $this->state->get('wmmodel', [])) {
             static::$mapping = $mapping;
         }
     }
-
 }

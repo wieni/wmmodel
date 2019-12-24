@@ -2,25 +2,20 @@
 
 namespace Drupal\wmmodel\Entity\Traits;
 
-use Doctrine\Common\Inflector\Inflector;
 use Drupal\Core\Entity\Exception\NoCorrespondingEntityClassException;
 use Drupal\Core\Entity\Plugin\DataType\EntityReference;
 use Drupal\taxonomy\Entity\Term;
 
 trait WmModel
 {
-
     protected static $storageMapping = [];
 
-    /**
-     * @inheritdoc
-     */
-    public static function create(array $values = array())
+    public static function create(array $values = [])
     {
         try {
             return parent::create($values);
         } catch (NoCorrespondingEntityClassException $e) {
-            list($entityType, $bundleName) = static::getModelInfo();
+            [$entityType, $bundleName] = static::getModelInfo();
             if (empty($entityType) || empty($bundleName)) {
                 throw $e;
             }
@@ -64,7 +59,7 @@ trait WmModel
             throw new \RuntimeException(sprintf(
                 "Can't deduce entityType or bundle name from class %s" . PHP_EOL
                 . "Got entityType: '%s' , bundle: '%s'" . PHP_EOL
-                . "Overwrite %s or %s",
+                . 'Overwrite %s or %s',
                 static::class,
                 $entityType,
                 $bundleName,
@@ -76,6 +71,33 @@ trait WmModel
         static::$storageMapping[static::class] = [$entityType, $bundleName];
 
         return [$entityType, $bundleName];
+    }
+
+    /**
+     * Get cache keys of referenced entities without instantiating them
+     * @return string[]
+     */
+    public function getReferencedEntitiesCacheTags()
+    {
+        $referenced_tags = [];
+        foreach ($this->getFields() as $field_items) {
+            foreach ($field_items as $field_item) {
+                // Loop over all properties of a field item.
+                foreach ($field_item->getProperties(true) as $property) {
+                    if (!$property instanceof EntityReference) {
+                        continue;
+                    }
+
+                    $id = $property->getTargetIdentifier();
+                    $entityType = $property->getTargetDefinition()->getEntityTypeId();
+
+                    if (is_numeric($id) && $entityType != 'user') {
+                        $referenced_tags[] = $entityType . ':' . $id;
+                    }
+                }
+            }
+        }
+        return $referenced_tags;
     }
 
     /**
@@ -103,33 +125,6 @@ trait WmModel
     protected static function bundleDeduceRegex()
     {
         return '#/Entity/(.*?)/(.*?)$#';
-    }
-
-    /**
-     * Get cache keys of referenced entities without instantiating them
-     * @return string[]
-     */
-    public function getReferencedEntitiesCacheTags()
-    {
-        $referenced_tags = [];
-        foreach ($this->getFields() as $field_items) {
-            foreach ($field_items as $field_item) {
-                // Loop over all properties of a field item.
-                foreach ($field_item->getProperties(TRUE) as $property) {
-                    if (!$property instanceof EntityReference) {
-                        continue;
-                    }
-
-                    $id = $property->getTargetIdentifier();
-                    $entityType = $property->getTargetDefinition()->getEntityTypeId();
-
-                    if (is_numeric($id) && $entityType != 'user') {
-                        $referenced_tags[] = $entityType . ':' . $id;
-                    }
-                }
-            }
-        }
-        return $referenced_tags;
     }
 
     /**

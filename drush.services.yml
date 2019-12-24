@@ -1,8 +1,8 @@
 services:
-  wmmodel.commands:
-    class: \Drupal\wmmodel\Commands\WmModelCommands
-    arguments:
-      - '@entity_type.manager'
-      - '@state'
-    tags:
-      - { name: drush.command }
+    wmmodel.commands:
+        class: Drupal\wmmodel\Commands\WmModelCommands
+        arguments:
+            - '@entity_type.manager'
+            - '@state'
+        tags:
+            - { name: drush.command }

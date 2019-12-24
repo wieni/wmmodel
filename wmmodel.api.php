@@ -1,11 +1,6 @@
 <?php
 
 /**
- * @file
- * Hooks provided by the Wieni Model module.
- */
-
-/**
  * Add content types to be converted to a Model
  *
  * @return array

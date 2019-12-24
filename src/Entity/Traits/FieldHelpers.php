@@ -6,7 +6,6 @@ use Drupal\Core\Entity\ContentEntityInterface;
 
 trait FieldHelpers
 {
-
     protected function removeReference(ContentEntityInterface $entity, $fieldName, $referenceName = 'target_id')
     {
         $id = $entity->id();

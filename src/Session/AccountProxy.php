@@ -2,12 +2,11 @@
 
 namespace Drupal\wmmodel\Session;
 
-use Drupal\Core\Session\AccountProxy as DrupalAccountProxy;
 use Drupal\Core\Session\AccountInterface;
+use Drupal\Core\Session\AccountProxy as DrupalAccountProxy;
 
 class AccountProxy extends DrupalAccountProxy
 {
-
     /** @var Drupal\user\Entity\User */
     protected $fullUser;
 
@@ -34,11 +33,6 @@ class AccountProxy extends DrupalAccountProxy
         }
 
         return $this->account;
-    }
-
-    protected function getCachedAccount()
-    {
-        return parent::getAccount();
     }
 
     public function id()
@@ -99,5 +93,10 @@ class AccountProxy extends DrupalAccountProxy
     public function getLastAccessedTime()
     {
         return $this->getCachedAccount()->getLastAccessedTime();
+    }
+
+    protected function getCachedAccount()
+    {
+        return parent::getAccount();
     }
 }

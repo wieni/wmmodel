@@ -13,7 +13,6 @@ use RegexIterator;
 
 class ModelFinder
 {
-
     /**
      * Finds models inside a module
      *
@@ -65,7 +64,7 @@ class ModelFinder
                 continue;
             }
 
-            list($type, $bundle) = call_user_func([$class, 'getModelInfo']);
+            [$type, $bundle] = call_user_func([$class, 'getModelInfo']);
 
             $key = $type . '.' . $bundle;
             $models[$key] = $class;
@@ -73,5 +72,4 @@ class ModelFinder
 
         return $models;
     }
-
 }
