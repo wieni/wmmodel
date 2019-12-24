@@ -1,7 +1,7 @@
 {
     "name": "wieni/wmmodel",
     "type": "drupal-module",
-    "description": "A convenient way to manage bundle-specific code in Drupal 8.",
+    "description": "Adds support for bundle-specific models for Drupal 8 entities.",
     "license": "MIT",
     "authors": [
         {
