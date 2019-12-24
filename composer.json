@@ -17,5 +17,9 @@
         }
     },
     "minimum-stability": "dev",
-    "prefer-stable": true
+    "prefer-stable": true,
+    "require": {
+        "php": ">=7.1.0",
+        "drupal/core": "^8.0 || ^9.0"
+    }
 }
