@@ -62,8 +62,6 @@ instructions on how to manually apply patches.
 ```json
 // composer.json
 {
-    ...
-    
     "extra": {
         "composer-exit-on-patch-failure": true,
         "patches": {
@@ -122,7 +120,6 @@ static `create` method can be called on model classes without having to
 pass the bundle in the values array.
 
 ```php
-
 use Drupal\mymodule\Entity\Node\Page;
 
 $page = Page::create();
