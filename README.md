@@ -1,64 +1,91 @@
-# Wieni Drupal Models
+wmmodel
+======================
 
-A convenient way to manage bundle-specific code in Drupal 8.
+[![Latest Stable Version](https://poser.pugx.org/wieni/wmmodel/v/stable)](https://packagist.org/packages/wieni/wmmodel)
+[![Total Downloads](https://poser.pugx.org/wieni/wmmodel/downloads)](https://packagist.org/packages/wieni/wmmodel)
+[![License](https://poser.pugx.org/wieni/wmmodel/license)](https://packagist.org/packages/wieni/wmmodel)
 
-```
-// Have the entitystorage return your classes
-$articleId = 1;
-$entity = \Drupal::entityTypeManager()->getStorage('node')->load($articleId);
-echo get_class($entity); // Drupal\mymodule\Entity\Node\Article
+> Adds support for bundle-specific models for Drupal 8 entities.
 
-// Or create a new article
-$newArticle = Article::create();
-$newArticle->setSomeCustomField($foobar);
-```
+## Why?
+- Improve the developer experience of the Entity API by providing the
+  ability to add extra methods to entity classes and implement certain
+  interfaces:
+  - Add getters and setters to make it easier and cleaner to fetch field
+    values in business logic and in Twig templates.
+    ```php
+    <?php
+
+    // This
+    $price = $page->get('field_slug')->first()->getValue();
+    // Is moved to a method and becomes this
+    $price = $page->getPrice();
+    ```
+  -  Use interfaces to abstract certain cross-type features:
+     ```php
+     <?php
+     
+     // This
+     if ($entity->getEntityTypeId() === 'node' && $entity->bundle() === 'page') {
+        return $entity->get('field_slug')->first()->getValue();
+     }
+     
+     if ($entity->getEntityTypeId() === 'taxonomy_term' && $entity->bundle() === 'tag') {
+        return $entity->get('field_tag_slug')->first()->getValue();
+     }
+     
+     // Is moved to seperate classes and becomes this
+     if ($entity instanceof SluggableEntityInterface) {
+        return $entity->getSlug();
+     }
+     ```
+- Drupal does not (yet) provide a way to subclass entities. For more
+  information and updates, please refer to the core issue
+  ([#2570593](https://www.drupal.org/node/2570593))
 
 ## Installation
 
-```
-composer require wieni\wmmodel
+This package requires PHP 7.1 and Drupal 8 or higher. It can be
+installed using Composer:
+
+```bash
+ composer require wieni/wmmodel
 ```
 
-Patch your core installation of Drupal 8.
+### Patch
+For this module to work, it is necessary to patch your Drupal
+installation. If you manage your installation with Composer, you should
+use the package to manage and automatically apply patches. If not,
+please check the [documentation](https://www.drupal.org/patch/apply) for
+instructions on how to manually apply patches.
 
-The patch will alter how Drupal creates an instance of entities so Storages will return your models.
-
-```
+```json
 // composer.json
 {
     ...
     
     "extra": {
+        "composer-exit-on-patch-failure": true,
         "patches": {
-            "drupal/core": "https://cdn.rawgit.com/wieni/wmmodel/0.2.1/src/Patch/core/wmmodel.patch"
+            "drupal/core": {
+                "The magic behind wmmodel": "https://raw.githubusercontent.com/wieni/wmmodel/0.3.3/src/Patch/core/wmmodel.patch"
+            }
         }
     }
 }
 ```
 
-Clear the cache
+## How does it work?
+### Creating models
+Models are Drupal plugins with the `@Model` annotation, extending their
+entity type class and implementing
+`Drupal\wmmodel\Entity\Interfaces\WmModelInterface`. The annotation has
+two required parameters, `entity_type` and `bundle`. Classes with this
+annotation should be placed in the `Entity` namespace of your module. To
+make sure the static `create` method works as expected, you should also
+include the `Drupal\wmmodel\Entity\Traits\WmModel` trait in your class.
 
-```
-drush cr
-drush en wmmodel
-drush model-list
-```
-
-## Creating Models
-
-A model has to implement `ContentEntityInterface` and `WmModelInterface`.
-
-It's recommended to extend `Drupal\node\Entity\Node`, `Drupal\taxonomy\Entity\Term` or `Drupal\eck\Entity\EckEntity` depending on what kind of model you are making.
-
-Implement `Drupal\wmmodel\Entity\Interfaces\WmModelInterface`. This forces you to define a static method called `getModelInfo()` that will return an array with the `EntityType` and `BundleName` of your model.
-
-The trait `Drupal\wmmodel\Entity\Traits\WmModel` can do this for you.
-
-> Follow the `<module>/Entity/<storage>/<bundle>` namespace convention to make your life easier.
-
-### Example model
-
-```
+```php
 <?php
 
 namespace Drupal\mymodule\Entity\Node;
@@ -67,146 +94,83 @@ use Drupal\node\Entity\Node;
 use Drupal\wmmodel\Entity\Interfaces\WmModelInterface;
 use Drupal\wmmodel\Entity\Traits\WmModel;
 
-class Article extends Node implements WmModelInterface
+/**
+ * @Model(
+ *     entity_type = "node",
+ *     bundle = "page"
+ * )
+ */
+class Page extends Node implements WmModelInterface
 {
     use WmModel;
 }
 ```
 
-> Create an Abstract[EntityTypeId] class for each of your types.
-> It takes about 5 minutes at the start of your project.
->
-> `src/Entity/Node/NodeModel`
-> 
-> `src/Entity/TaxonomyTerm/TermModel`
->
-> `src/Entity/Subcontent/SubcontentModel`
+To make sure bundles are mapped to the right classes, you can use the
+`wmmodel:list` Drush command.
 
-## Mapping
-
-### List all bundles and check if a model exists
-
-Use the drush command `drush model-list` or `drush wml` to list all bundles and their model.
-
-### Registering models
-Use the `hook_entity_model_mapping()` hook to map your models.
-
-```
-function mymodule_entity_model_mapping()
-{
-    // Add mappings
-    $mapping['node.article'] = \Drupal\mymodule\Entity\Node\Article::class;
-    $mapping['subcontent.product'] = \Drupal\mymodule\Entity\Subcontent\Product::class;
-
-    return $mapping;
-}
+```bash
+> drush wmmodel:list
+ Model "media.image" is not mapped.
+ Model "node.page" is mapped against "Drupal\mymodule\Entity\Node\Page".
 ```
 
-When you follow the `<module>/Entity/<storage>/<bundle>` namespace convention you can use a service that will automatically find your models.
+### Creating and loading entities
+Creating and loading entities happens in the same way as before, by
+using `Drupal\Core\Entity\EntityTypeManagerInterface`. Additionally, the
+static `create` method can be called on model classes without having to
+pass the bundle in the values array.
 
-```
-function mymodule_entity_model_mapping()
-{
-    $modelFinder = \Drupal::service('wmmodel.service.finder');
-    return $modelFinder->findModels('mymodule');
-}
-```
+```php
 
-### Eck
+use Drupal\mymodule\Entity\Node\Page;
 
-Eck is an awesome module. I prefer to rest my eck entities in a `src/Entity/Eck/` directory. However this means breaking from my own convention.
-
-To get around this you can create an **abstract** class that overrides how this module deduces the EntityType and Bundle from a namespace.
-
-```
-// src/Entity/Eck/EckModel.php
-<?php
-
-namespace Drupal\mymodule\Entity\Eck;
-
-use Drupal\eck\Entity\EckEntity;
-use Drupal\wmmodel\Entity\Interfaces\WmModelInterface;
-use Drupal\wmmodel\Entity\Traits\WmModel;
-
-abstract class EckModel extends EckEntity implements WmModelInterface
-{
-    use WmModel;
-
-    protected static function bundleDeduceRegex()
-    {
-        return '#/Entity/Eck/(.*?)/(.*?)$#';
-    }
-
-}
+$page = Page::create();
 ```
 
-And then have your Eck models extend this class
+### Controller resolving
+If a controller is handling a route with entity parameters, the models
+can be automatically injected in the arguments of the controller method
+by using the right type hint. This is especially useful in combination
+with the [`wmcontroller`](https://github.com/wieni/wmcontroller) module.
 
-```
-// src/Entity/Eck/Subcontent/Product.php
-<?php
-
-namespace Drupal\mymodule\Entity\Eck\Subcontent;
-
-use Drupal\mymodule\Entity\Eck\EckModel;
-
-class Product extends EckModel
-{
-}
-```
-
-### Altering mapped models
-
-The `hook_entity_model_mapping_alter` hook can be used to alter registered models by other modules.
- 
-```
-function mymodule_entity_model_mapping_alter(&$mapping)
-{
-    // Map a bundle "article" with entity type "node" to a custom class
-    $mapping['node.article'] = 'Drupal\mymodule\Entity\Node\Article';
-}
-```
-
-## Cool stuff you should do
-
-### PreSave / PostSave
-
-I don't like having bundle-specific _presave _postsave _predelete stuff in my module files.
-It makes more sense to have it at the Model.
- 
-```
- // Drupal\mymodule\Entity\Node\Article
- 
- public function postSave(EntityStorageInterface $storage, $update = true)
- {
-    parent::postSave($storage, $update);
-    
-    // Do whatever you have to do after a save
-    // Send events, queue mails, whatever
- }
-```
-
-### Bundle-specific controllers
-
-Team up this module with [wieni/wmcontroller](https://github.com/wieni/wmcontroller) and use bundle-specific controllers with models!
-
-```
-// src/Controller/Node/ArticleController.php
+```php
 <?php
 
 namespace Drupal\mymodule\Controller\Node;
 
+use Drupal\mymodule\Entity\Node\Page;
 use Drupal\wmcontroller\Controller\ControllerBase;
-use Drupal\mymodule\Entity\Node\Article;
 
-class ArticleController extends ControllerBase
+class PageController extends ControllerBase
 {
-
-    public function show(Article $article)
+    public function show(Page $page)
     {
-        // Whatever logic you need to perform in order
-        // to render an Article
+        return $this->view(
+            'node.page.detail',
+            ['page' => $page]
+        );
     }
-
 }
+
 ```
+
+### Injecting the user entity
+This module provides an alternative implementation of
+`Drupal\Core\Session\AccountProxyInterface` (returned by the
+`current_user` service) that makes the `getAccount` method return the
+actual User entity instead of an instance of
+`Drupal\Core\Session\UserSession`.
+
+## Changelog
+All notable changes to this project will be documented in the
+[CHANGELOG](CHANGELOG.md) file.
+
+## Security
+If you discover any security-related issues, please email
+[security@wieni.be](mailto:security@wieni.be) instead of using the issue
+tracker.
+
+## License
+Distributed under the MIT License. See the [LICENSE](LICENSE.md) file
+for more information.
