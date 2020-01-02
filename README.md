@@ -17,9 +17,9 @@ wmmodel
     <?php
 
     // This
-    $price = $page->get('field_slug')->first()->getValue();
+    $slug = $page->get('field_slug')->first()->getValue();
     // Is moved to a method and becomes this
-    $price = $page->getPrice();
+    $slug = $page->getSlug();
     ```
   -  Use interfaces to abstract certain cross-type features:
      ```php
