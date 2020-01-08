@@ -11,15 +11,18 @@ trait WmModel
         $entityTypeManager = \Drupal::entityTypeManager();
         $modelFactory = \Drupal::service('wmmodel.factory.model');
 
-        if (!$definition = $modelFactory->getDefinition(static::class)) {
+        if (!$definition = $modelFactory->getEntityTypeAndBundle(static::class)) {
             throw new NoCorrespondingEntityClassException(static::class);
         }
 
-        $entityType = $entityTypeManager->getDefinition($definition['entity_type']);
-        $values[$entityType->getKey('bundle')] = $definition['bundle'];
+        [$entityTypeId, $bundle] = $definition;
+        $bundleKey = $entityTypeManager
+            ->getDefinition($entityTypeId)
+            ->getKey('bundle');
+        $values[$bundleKey] = $bundle;
 
         return $entityTypeManager
-            ->getStorage($definition['entity_type'])
+            ->getStorage($entityTypeId)
             ->create($values);
     }
 }
