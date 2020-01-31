@@ -19,7 +19,7 @@ trait EntityTranslatorTrait
         return array_filter($translated);
     }
 
-    protected function translateEntity(?EntityInterface $entity, ?string $langcode = null): ?EntityInterface
+    protected function translateEntity(?EntityInterface $entity, ?string $langcode = null, bool $strict = true): ?EntityInterface
     {
         if (!$langcode) {
             $langcode = $this->languageManager()
@@ -36,7 +36,7 @@ trait EntityTranslatorTrait
         }
 
         if (!$entity->hasTranslation($langcode)) {
-            return null;
+            return $strict ? null : $entity;
         }
 
         return $entity->getTranslation($langcode);
