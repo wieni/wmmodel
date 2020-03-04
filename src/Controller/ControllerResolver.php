@@ -3,6 +3,7 @@
 namespace Drupal\wmmodel\Controller;
 
 use Drupal\Core\Controller\ControllerResolver as DrupalControllerResolver;
+use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Routing\RouteMatch;
 use Drupal\Core\Routing\RouteMatchInterface;
 use Drupal\wmmodel\Entity\Interfaces\WmModelInterface;
@@ -89,6 +90,17 @@ class ControllerResolver extends DrupalControllerResolver
         return is_object($object) && is_subclass_of($object, WmModelInterface::class);
     }
 
+    /**
+     * Check if an attribute is a FormState
+     * This allows us to typehint $formSate instead of snake-case $form_state
+     * @param $object
+     * @return bool
+     */
+    protected function isFormState($object)
+    {
+        return is_object($object) && is_subclass_of($object, FormStateInterface::class);
+    }
+
     private function addModel(&$arguments, &$attributes, \ReflectionParameter $param)
     {
         if (!$param->getClass()) {
@@ -96,7 +108,10 @@ class ControllerResolver extends DrupalControllerResolver
         }
 
         foreach ($attributes as $key => $attribute) {
-            if ($this->isWmModel($attribute) && $this->isSubclass($attribute, $param->getClass()->name)) {
+            if (
+                ($this->isWmModel($attribute) || $this->isFormState($attribute))
+                && $this->isSubclass($attribute, $param->getClass()->name)
+            ) {
                 $arguments[] = $attribute;
                 // Remove from attributes so it can't give the same argument multiple times
                 unset($attributes[$key]);
