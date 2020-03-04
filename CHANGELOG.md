@@ -6,6 +6,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.1.1] - 2020-03-04
+### Added
+- Add argument resolving for FormState so we can typehint $formState instead of $form_state
+
+## [0.3.7] - 2020-03-04
+### Added
+- Add argument resolving for FormState so we can typehint $formState instead of $form_state
+
 ## [1.1.0] - 2020-02-05
 ### Added
 - Add getDateTime, setDateTime, formatLinks & formatLink field helpers
