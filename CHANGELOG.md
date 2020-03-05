@@ -6,6 +6,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.1.2] - 2020-03-05
+### Fixed
+- Change getEntityTypeAndBundle to also consider entity type class
+
 ## [1.1.1] - 2020-03-04
 ### Added
 - Add argument resolving for FormState so we can typehint $formState instead of $form_state

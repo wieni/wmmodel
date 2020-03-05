@@ -2,6 +2,7 @@ services:
     wmmodel.factory.model:
         class: Drupal\wmmodel\Factory\ModelFactory
         arguments:
+            - '@entity_type.manager'
             - '@plugin.manager.wmmodel.model'
 
     wmmodel.argument_resolver:
