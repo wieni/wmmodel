@@ -6,6 +6,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.1.3] - 2020-03-10
+### Fixed
+- Fix FieldHelpers::setDateTime method not working when `datetime_type` equals `date`.
+
 ## [1.1.2] - 2020-03-05
 ### Fixed
 - Change getEntityTypeAndBundle to also consider entity type class

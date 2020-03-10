@@ -4,6 +4,7 @@ namespace Drupal\wmmodel\Entity\Traits;
 
 use Drupal\Core\Datetime\DrupalDateTime;
 use Drupal\Core\Entity\EntityInterface;
+use Drupal\datetime\Plugin\Field\FieldType\DateTimeItem;
 use Drupal\datetime\Plugin\Field\FieldType\DateTimeItemInterface;
 use Drupal\link\Plugin\Field\FieldType\LinkItem;
 
@@ -35,7 +36,12 @@ trait FieldHelpers
 
     protected function setDateTime(string $fieldName, \DateTimeInterface $dateTime): self
     {
-        $this->set($fieldName, $dateTime->format(DateTimeItemInterface::DATETIME_STORAGE_FORMAT));
+        $datetimeType = $this->get($fieldName)->getFieldDefinition()->getSetting('datetime_type');
+        $storageFormat = $datetimeType === DateTimeItem::DATETIME_TYPE_DATE
+            ? DateTimeItemInterface::DATE_STORAGE_FORMAT
+            : DateTimeItemInterface::DATETIME_STORAGE_FORMAT;
+
+        $this->set($fieldName, $dateTime->format($storageFormat));
 
         return $this;
     }
