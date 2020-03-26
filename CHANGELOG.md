@@ -5,16 +5,22 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+/
+
+## [1.1.4] - 2020-03-26
 ### Changed
 - Update wmmodel.api.php
 
+### Fixed
+- Update [`EntityTranslatorTrait::translateEntities`](src/Entity/Traits/EntityTranslatorTrait.php) arguments.
+
 ## [1.1.3] - 2020-03-10
 ### Fixed
-- Fix FieldHelpers::setDateTime method not working when `datetime_type` equals `date`.
+- Fix [`FieldHelpers::setDateTime`](src/Entity/Traits/FieldHelpers.php) method not working when `datetime_type` equals `date`.
 
 ## [1.1.2] - 2020-03-05
 ### Fixed
-- Change getEntityTypeAndBundle to also consider entity type class
+- Change [`ModelFactoryInterface::getEntityTypeAndBundle`](src/Factory/ModelFactoryInterface.php) to also consider entity type class
 
 ## [1.1.1] - 2020-03-04
 ### Added

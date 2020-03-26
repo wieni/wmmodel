@@ -9,11 +9,11 @@ use Drupal\Core\TypedData\TranslatableInterface;
 trait EntityTranslatorTrait
 {
     /** @return EntityInterface[] */
-    protected function translateEntities(array $entities = [], $lancode = null): array
+    protected function translateEntities(array $entities = [], ?string $langcode = null, bool $strict = true): array
     {
         $translated = [];
         foreach ($entities as $key => $entity) {
-            $translated[$key] = $this->translateEntity($entity, $lancode);
+            $translated[$key] = $this->translateEntity($entity, $langcode, $strict);
         }
 
         return array_filter($translated);
