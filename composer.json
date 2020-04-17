@@ -8,6 +8,9 @@
             "email": "info@wieni.be"
         }
     ],
+    "require": {
+        "drupal/core": "8.0 - 8.5"
+    },
     "minimum-stability": "dev",
     "prefer-stable": true,
     "type": "drupal-module",
