@@ -35,7 +35,7 @@ class ArgumentResolverTest extends UnitTestCase
             ->getMock();
 
         $request = Request::create('/');
-        $request->attributes->set('entity', $mockEntity);
+        $request->attributes->set('foobar', $mockEntity);
         $request->attributes->set('form_state', $mockFormState);
         $controller = [new MockController(), 'show'];
 
