@@ -1,0 +1,22 @@
+<?php
+
+function wmmodel_entity_type_alter(array &$entityTypes)
+{
+    $manager = \Drupal::getContainer()->get('plugin.manager.wmmodel.model');
+
+    foreach ($manager->getDefinitions() as $definition) {
+        $entityTypeId = $definition['entity_type'];
+
+        if (!isset($entityTypes[$entityTypeId])) {
+            continue;
+        }
+
+        $bundleEntityTypeId = $entityTypes[$entityTypeId]->getBundleEntityType();
+
+        if ($bundleEntityTypeId && isset($entityTypes[$bundleEntityTypeId])) {
+            continue;
+        }
+
+        $entityTypes[$definition['entity_type']]->setClass($definition['class']);
+    }
+}

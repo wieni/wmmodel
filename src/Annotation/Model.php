@@ -16,10 +16,10 @@ class Model extends Plugin
 
     public function getId()
     {
-        if (isset($this->definition['entity_type'], $this->definition['bundle'])) {
+        if (isset($this->definition['entity_type'])) {
             return implode('.', [
                 $this->definition['entity_type'],
-                $this->definition['bundle'],
+                $this->definition['bundle'] ?? $this->definition['entity_type'],
             ]);
         }
 
