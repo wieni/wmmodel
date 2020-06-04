@@ -14,6 +14,7 @@ class ModelValueResolver implements ArgumentValueResolverInterface
     {
         return is_a($argument->getType(), WmModelInterface::class, true)
             // We want to typehint $formState instead of $form_state
+            // @see https://www.drupal.org/project/drupal/issues/3006502
             || is_a($argument->getType(), FormStateInterface::class, true);
     }
 
