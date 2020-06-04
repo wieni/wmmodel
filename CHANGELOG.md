@@ -4,8 +4,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
-- Mark drupal/core >= 8.6 as dependency
+## [1.2.0] - 2020-06-04
+### Added
+- Add basic test coverage
+- Add support for changing class of entities without bundles. The bundle annotation parameter is now no longer required
+ for entity types without bundles, e.g. `Drupal\user\Entity\User`
+
+### Changed
+- Change minimum required core version to 8.6
+- Mention related core issue in ModelValueResolver
+- Add composer.lock to .gitignore
 
 ## [1.1.4] - 2020-03-26
 ### Changed
