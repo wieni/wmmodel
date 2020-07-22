@@ -2,4 +2,7 @@ name: wmmodel
 type: module
 description: Adds support for bundle-specific models for Drupal 8 entities.
 core: 8.x
+core_version_requirement: ^8 || ^9
+dependencies:
+    - drupal:system (>= 8.6)
 package: Wieni

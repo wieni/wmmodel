@@ -14,7 +14,7 @@
         "drupal/core": "^8.6 || ^9.0"
     },
     "require-dev": {
-        "drupal/core-dev": "^8.0 || ^9.0",
+        "drupal/core-dev": "^8.6 || ^9.0",
         "ergebnis/composer-normalize": "^2.0",
         "wieni/wmcodestyle": "^1.0"
     },
