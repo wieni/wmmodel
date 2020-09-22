@@ -6,6 +6,7 @@ use Drupal\Core\Entity\Exception\NoCorrespondingEntityClassException;
 
 trait WmModel
 {
+    /** @return static[] */
     public static function loadMultiple(array $ids = null)
     {
         $entityTypeManager = \Drupal::entityTypeManager();
@@ -35,6 +36,7 @@ trait WmModel
         return $storage->loadMultiple($ids);
     }
 
+    /** @return static */
     public static function create(array $values = [])
     {
         $entityTypeManager = \Drupal::entityTypeManager();
