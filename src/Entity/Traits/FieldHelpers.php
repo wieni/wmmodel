@@ -25,7 +25,7 @@ trait FieldHelpers
         }
 
         $timezone = new \DateTimeZone(date_default_timezone_get());
-        $dateTime = \DateTime::createFromFormat('U', $date, $timezone);
+        $dateTime = (\DateTime::createFromFormat('U', $date))->setTimezone($timezone);
 
         if (!$dateTime) {
             return null;
