@@ -1,0 +1,9 @@
+parameters:
+    ignoreErrors:
+        -
+            message: '#^Function drupal_get_user_timezone not found#'
+            path: src/Session/AccountProxy.php
+
+includes:
+	- vendor/wieni/wmcodestyle/phpstan/custom-rules.neon
+	- vendor/wieni/wmcodestyle/phpstan/drupal-module.neon

@@ -30,7 +30,8 @@
     "scripts": {
         "coding-standards": [
             "@composer normalize",
-            "php-cs-fixer fix --config=.php_cs.php"
+            "php-cs-fixer fix --config=.php_cs.php",
+            "phpstan analyse"
         ]
     }
 }
