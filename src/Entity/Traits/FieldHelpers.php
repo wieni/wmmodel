@@ -36,14 +36,28 @@ trait FieldHelpers
 
     protected function setDateTime(string $fieldName, \DateTimeInterface $dateTime): self
     {
-        $datetimeType = $this->get($fieldName)->getFieldDefinition()->getSetting('datetime_type');
-        $storageFormat = $datetimeType === DateTimeItem::DATETIME_TYPE_DATE
-            ? DateTimeItemInterface::DATE_STORAGE_FORMAT
-            : DateTimeItemInterface::DATETIME_STORAGE_FORMAT;
+        $definition = $this->get($fieldName)->getFieldDefinition();
 
-        $this->set($fieldName, $dateTime->format($storageFormat));
+        if ($definition->getType() === 'datetime') {
+            $datetimeType = $definition->getSetting('datetime_type');
+            $storageFormat = $datetimeType === DateTimeItem::DATETIME_TYPE_DATE
+                ? DateTimeItemInterface::DATE_STORAGE_FORMAT
+                : DateTimeItemInterface::DATETIME_STORAGE_FORMAT;
 
-        return $this;
+            $this->set($fieldName, $dateTime->format($storageFormat));
+
+            return $this;
+        }
+
+        if ($definition->getType() === 'timestamp') {
+            $this->set($fieldName, $dateTime->format('U'));
+
+            return $this;
+        }
+
+        throw new \InvalidArgumentException(
+            sprintf('storeDateTime does not work with field type "%s"', $definition->getType())
+        );
     }
 
     protected function formatLinks(string $fieldName): array
