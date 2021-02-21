@@ -4,6 +4,8 @@ namespace Drupal\wmmodel\Entity\Traits;
 
 use Drupal\Core\Datetime\DrupalDateTime;
 use Drupal\Core\Entity\EntityInterface;
+use Drupal\Core\Field\Plugin\Field\FieldType\CreatedItem;
+use Drupal\Core\Field\Plugin\Field\FieldType\TimestampItem;
 use Drupal\datetime\Plugin\Field\FieldType\DateTimeItem;
 use Drupal\datetime\Plugin\Field\FieldType\DateTimeItemInterface;
 use Drupal\link\Plugin\Field\FieldType\LinkItem;
@@ -16,48 +18,55 @@ trait FieldHelpers
             return null;
         }
 
-        if (!($date = $this->get($fieldName)->date) && !($date = $this->get($fieldName)->value)) {
-            return null;
+        $field = $this->get($fieldName)->first();
+
+        if ($field instanceof TimestampItem) {
+            $timestamp = $field->value;
         }
 
-        if ($date instanceof DrupalDateTime) {
-            $date = $date->format('U');
+        if ($field instanceof DateTimeItem) {
+            if (!$date = $field->date) {
+                return null;
+            }
+
+            $timestamp = $date->format('U');
         }
 
-        $timezone = new \DateTimeZone(date_default_timezone_get());
-        $dateTime = (\DateTime::createFromFormat('U', $date))->setTimezone($timezone);
-
-        if (!$dateTime) {
-            return null;
+        if (!isset($timestamp)) {
+            throw new \InvalidArgumentException(
+                sprintf('FieldHelpers::getDateTime cannot deal with %s fields.', $field->getFieldDefinition()->getType())
+            );
         }
 
-        return $dateTime;
+        return \DateTime::createFromFormat('U', $timestamp)
+            ->setTimezone(new \DateTimeZone(date_default_timezone_get()));
     }
 
     protected function setDateTime(string $fieldName, \DateTimeInterface $dateTime): self
     {
-        $definition = $this->get($fieldName)->getFieldDefinition();
+        $fieldDefinition = $this->get($fieldName)->getFieldDefinition();
+        $fieldType = $fieldDefinition->getType();
 
-        if ($definition->getType() === 'datetime') {
-            $datetimeType = $definition->getSetting('datetime_type');
+        if (in_array($fieldType, ['created', 'changed', 'timestamp'], true)) {
+            $storageFormat = 'U';
+        }
+
+        if ($fieldType === 'datetime') {
+            $datetimeType = $fieldDefinition->getSetting('datetime_type');
             $storageFormat = $datetimeType === DateTimeItem::DATETIME_TYPE_DATE
                 ? DateTimeItemInterface::DATE_STORAGE_FORMAT
                 : DateTimeItemInterface::DATETIME_STORAGE_FORMAT;
-
-            $this->set($fieldName, $dateTime->format($storageFormat));
-
-            return $this;
         }
 
-        if ($definition->getType() === 'timestamp') {
-            $this->set($fieldName, $dateTime->format('U'));
-
-            return $this;
+        if (!isset($storageFormat)) {
+            throw new \InvalidArgumentException(
+                sprintf('FieldHelpers::setDateTime cannot deal with %s fields.', $fieldType)
+            );
         }
 
-        throw new \InvalidArgumentException(
-            sprintf('storeDateTime does not work with field type "%s"', $definition->getType())
-        );
+        $this->set($fieldName, $dateTime->format($storageFormat));
+
+        return $this;
     }
 
     protected function formatLinks(string $fieldName): array

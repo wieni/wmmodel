@@ -6,7 +6,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 ### Added
-- Add support for timestamp fields to FieldHelpers::setDateTime
+- Add support for timestamp fields to FieldHelpers methods
 
 ## [1.3.1] - 2020-10-27
 ### Fixed
