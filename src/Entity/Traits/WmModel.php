@@ -6,6 +6,22 @@ use Drupal\Core\Entity\Exception\NoCorrespondingEntityClassException;
 
 trait WmModel
 {
+    /** @return static */
+    public static function load($id)
+    {
+        $modelFactory = \Drupal::service('wmmodel.factory.model');
+
+        if (!$definition = $modelFactory->getEntityTypeAndBundle(static::class)) {
+            throw new NoCorrespondingEntityClassException(static::class);
+        }
+
+        [$entityTypeId] = $definition;
+
+        return \Drupal::entityTypeManager()
+            ->getStorage($entityTypeId)
+            ->load($id);
+    }
+    
     /** @return static[] */
     public static function loadMultiple(array $ids = null)
     {
