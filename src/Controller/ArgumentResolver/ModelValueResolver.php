@@ -25,5 +25,9 @@ class ModelValueResolver implements ArgumentValueResolverInterface
                 yield $request->attributes->get($name);
             }
         }
+
+        if ($argument->hasDefaultValue()) {
+            yield $argument->getDefaultValue();
+        }
     }
 }
