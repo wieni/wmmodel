@@ -2,9 +2,7 @@
 
 namespace Drupal\wmmodel\Entity\Traits;
 
-use Drupal\Core\Datetime\DrupalDateTime;
 use Drupal\Core\Entity\EntityInterface;
-use Drupal\Core\Field\Plugin\Field\FieldType\CreatedItem;
 use Drupal\Core\Field\Plugin\Field\FieldType\TimestampItem;
 use Drupal\datetime\Plugin\Field\FieldType\DateTimeItem;
 use Drupal\datetime\Plugin\Field\FieldType\DateTimeItemInterface;
@@ -14,35 +12,53 @@ trait FieldHelpers
 {
     protected function getDateTime(string $fieldName): ?\DateTimeInterface
     {
+        $dateTimes = $this->getDateTimes($fieldName);
+
+        return reset($dateTimes) ?: null;
+    }
+
+    /** @return \DateTimeInterface[] */
+    protected function getDateTimes(string $fieldName): array
+    {
         if (!$this->hasField($fieldName) || $this->get($fieldName)->isEmpty()) {
-            return null;
+            return [];
         }
 
-        $field = $this->get($fieldName)->first();
+        $dateTimes = [];
 
-        if ($field instanceof TimestampItem) {
-            $timestamp = $field->value;
-        }
-
-        if ($field instanceof DateTimeItem) {
-            if (!$date = $field->date) {
-                return null;
+        foreach ($this->get($fieldName) as $field) {
+            if ($field instanceof TimestampItem) {
+                $timestamp = $field->value;
             }
 
-            $timestamp = $date->format('U');
+            if ($field instanceof DateTimeItem) {
+                if (!$date = $field->date) {
+                    continue;
+                }
+
+                $timestamp = $date->format('U');
+            }
+
+            if (!isset($timestamp)) {
+                throw new \InvalidArgumentException(
+                    sprintf('FieldHelpers::getDateTimes cannot deal with %s fields.', $field->getFieldDefinition()->getType())
+                );
+            }
+
+            $dateTimes[] = \DateTime::createFromFormat('U', $timestamp)
+                ->setTimezone(new \DateTimeZone(date_default_timezone_get()));
         }
 
-        if (!isset($timestamp)) {
-            throw new \InvalidArgumentException(
-                sprintf('FieldHelpers::getDateTime cannot deal with %s fields.', $field->getFieldDefinition()->getType())
-            );
-        }
-
-        return \DateTime::createFromFormat('U', $timestamp)
-            ->setTimezone(new \DateTimeZone(date_default_timezone_get()));
+        return $dateTimes;
     }
 
     protected function setDateTime(string $fieldName, \DateTimeInterface $dateTime): self
+    {
+        return $this->setDateTimes($fieldName, [$dateTime]);
+    }
+
+    /** @param \DateTimeInterface[] $dateTimes */
+    protected function setDateTimes(string $fieldName, array $dateTimes): self
     {
         $fieldDefinition = $this->get($fieldName)->getFieldDefinition();
         $fieldType = $fieldDefinition->getType();
@@ -64,9 +80,12 @@ trait FieldHelpers
             );
         }
 
-        $this->set($fieldName, $dateTime->format($storageFormat));
-
-        return $this;
+        return $this->set($fieldName, array_map(
+            static function (\DateTimeInterface $dateTime) use ($storageFormat) {
+                return $dateTime->format($storageFormat);
+            },
+            $dateTimes
+        ));
     }
 
     protected function formatLinks(string $fieldName): array
