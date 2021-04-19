@@ -22,7 +22,7 @@ trait EntityTranslatorTrait
     protected function translateEntity(?EntityInterface $entity, ?string $langcode = null, bool $strict = true): ?EntityInterface
     {
         if (!$langcode) {
-            $langcode = $this->languageManager()
+            $langcode = \Drupal::languageManager()
                 ->getCurrentLanguage(LanguageInterface::TYPE_CONTENT)
                 ->getId();
         }
