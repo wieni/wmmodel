@@ -130,12 +130,16 @@ trait FieldHelpers
             'external' => false,
         ];
 
-        if (!$item->isExternal() && $item->getUrl()->isRouted() && in_array($item->getUrl()->getRouteName(), ['<nolink>', '<none>'])) {
-            $url = '';
-        } elseif (!$item->isExternal() && $entity = $this->getReferencedEntityFromLink($item)) {
-            $url = $entity->toUrl()->toString();
-        } else {
+        if ($item->isExternal()) {
             $url = $item->getUrl()->toString();
+        } elseif ($item->getUrl()->isRouted() && in_array($item->getUrl()->getRouteName(), ['<nolink>', '<none>'])) {
+            if ($fragment = $item->getUrl()->getOption('fragment')) {
+                $url = '#' . $fragment;
+            } else {
+                $url = '';
+            }
+        } elseif ($entity = $this->getReferencedEntityFromLink($item)) {
+            $url = $entity->toUrl()->toString();
         }
 
         $link['url'] = $url;
