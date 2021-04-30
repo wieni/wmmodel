@@ -23,11 +23,15 @@ class ModelValueResolver implements ArgumentValueResolverInterface
         foreach ($request->attributes->getIterator() as $name => $attribute) {
             if (is_object($attribute) && is_a($attribute, $argument->getType())) {
                 yield $request->attributes->get($name);
+
+                return;
             }
         }
 
         if ($argument->hasDefaultValue()) {
             yield $argument->getDefaultValue();
+
+            return;
         }
 
         yield null;
