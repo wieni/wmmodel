@@ -128,6 +128,7 @@ trait FieldHelpers
             'url' => '',
             'text' => '',
             'external' => false,
+            'entity' => null,
         ];
 
         if ($item->getUrl()->isRouted() && in_array($item->getUrl()->getRouteName(), ['<nolink>', '<none>'])) {
@@ -137,6 +138,7 @@ trait FieldHelpers
                 $url = '';
             }
         } elseif ($entity = $this->getReferencedEntityFromLink($item)) {
+            $link['entity'] = $entity;
             $url = $entity->toUrl()->toString();
         } else {
             $url = $item->getUrl()->toString();
