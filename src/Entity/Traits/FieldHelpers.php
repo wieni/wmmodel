@@ -52,13 +52,13 @@ trait FieldHelpers
         return $dateTimes;
     }
 
-    protected function setDateTime(string $fieldName, \DateTimeInterface $dateTime): self
+    protected function setDateTime(string $fieldName, \DateTimeInterface $dateTime)
     {
         return $this->setDateTimes($fieldName, [$dateTime]);
     }
 
     /** @param \DateTimeInterface[] $dateTimes */
-    protected function setDateTimes(string $fieldName, array $dateTimes): self
+    protected function setDateTimes(string $fieldName, array $dateTimes)
     {
         $fieldDefinition = $this->get($fieldName)->getFieldDefinition();
         $fieldType = $fieldDefinition->getType();
