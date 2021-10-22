@@ -152,6 +152,22 @@ class PageController extends ControllerBase
 
 ```
 
+If you're creating a custom route with an entity parameter and you want to restrict that parameter to only entities of a
+certain bundle, you can now add the bundle to the parameter type definition in the route:
+
+```yml
+mymodule.company.suggestion:
+    path: '/companies/{company}/suggestion'
+    defaults:
+        _controller: 'Drupal\wmcustom\Controller\Node\CompanyController::addSuggestion'
+    options:
+        parameters:
+            company:
+                type: 'entity:node:company'
+    requirements:
+      _access: 'TRUE'
+```
+
 ### Injecting the user entity
 This module provides an alternative implementation of
 `Drupal\Core\Session\AccountProxyInterface` (returned by the

@@ -11,3 +11,8 @@ services:
     plugin.manager.wmmodel.model:
         class: Drupal\wmmodel\ModelPluginManager
         parent: default_plugin_manager
+
+    wmmodel.paramconverter.entity_bundle:
+        class: Drupal\wmmodel\ParamConverter\EntityBundleConverter
+        parent: 'paramconverter.entity'
+        tags: [{ name: paramconverter, priority: 20 }]
