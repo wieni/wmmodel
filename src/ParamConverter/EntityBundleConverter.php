@@ -54,16 +54,17 @@ class EntityBundleConverter extends EntityConverter
                 return false;
             }
 
-            $entityCount = (int) $this->entityTypeManager
+            // We're loading the full entity instead of doing a count query, because this way it will be statically
+            // cached and we'll probably need the entity later on anyway. This saves us a query in most cases.
+            $entities = $this->entityTypeManager
                 ->getStorage($entityTypeId)
                 ->getQuery()
                 ->accessCheck(false)
                 ->condition($typeDefinition->getKey('bundle'), $bundle)
                 ->condition($typeDefinition->getKey('id'), $defaults[$name])
-                ->count()
                 ->execute();
 
-            if ($entityCount > 0) {
+            if (count($entities) > 0) {
                 return $entityTypeId;
             }
         }
