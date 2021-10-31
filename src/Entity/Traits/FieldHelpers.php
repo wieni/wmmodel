@@ -3,6 +3,7 @@
 namespace Drupal\wmmodel\Entity\Traits;
 
 use Drupal\Core\Entity\EntityInterface;
+use Drupal\Core\Field\FieldItemListInterface;
 use Drupal\Core\Field\Plugin\Field\FieldType\TimestampItem;
 use Drupal\datetime\Plugin\Field\FieldType\DateTimeItem;
 use Drupal\datetime\Plugin\Field\FieldType\DateTimeItemInterface;
@@ -86,6 +87,19 @@ trait FieldHelpers
             },
             $dateTimes
         ));
+    }
+
+    /** Get the source field item list of a referenced media entity. */
+    protected function getMediaSource(string $fieldName): ?FieldItemListInterface
+    {
+        if (!$media = $this->get($fieldName)->entity) {
+            return null;
+        }
+
+        $sourceConfig = $media->getSource()->getConfiguration();
+        $sourceFieldName = $sourceConfig['source_field'] ?? null;
+
+        return $media->get($sourceFieldName);
     }
 
     protected function formatLinks(string $fieldName): array

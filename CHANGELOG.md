@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.6.0] - 2021-10-31
+### Added
+- Add `FieldHelpers::getMediaSource` method to get the source field item list of a referenced media entity.
+
 ## [1.5.0] - 2021-10-22
 ### Added
 - Add entity bundle route param converter
