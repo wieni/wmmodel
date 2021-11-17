@@ -2,10 +2,10 @@
 
 This document describes breaking changes and how to upgrade. For a complete list of changes including minor and patch releases, please refer to the [`CHANGELOG`](CHANGELOG.md).
 
-## Unreleased
-More information about breaking changes, removed functionality and their
-alternatives is provided in the [Upgrade Guide](UPGRADING.md).
+## 1.1.0
+The `removeReference` & `removeFromList` field helpers were removed. Copy them to your classes if you still need them.
 
+## 1.0.0
 ### Drupal plugins
 Model classes are now discovered using the Drupal plugin system instead
 of relying on our own implementation. These are the implications: 

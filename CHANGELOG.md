@@ -101,6 +101,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Add argument resolving for FormState so we can typehint $formState instead of $form_state
 
 ## [1.1.0] - 2020-02-05
+More information about breaking changes, removed functionality and their
+alternatives is provided in the [Upgrade Guide](UPGRADING.md).
+
 ### Added
 - Add getDateTime, setDateTime, formatLinks & formatLink field helpers
 - Add EntityTranslatorTrait to easily translate entities
@@ -110,6 +113,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Remove removeReference & removeFromList field helpers
 
 ## [1.0.0] - 2020-01-31
+More information about breaking changes, removed functionality and their
+alternatives is provided in the [Upgrade Guide](UPGRADING.md).
+
 ### Added
 - Add Drush 10 support
 - Add php & drupal/core version requirements
