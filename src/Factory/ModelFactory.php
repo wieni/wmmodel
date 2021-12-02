@@ -5,20 +5,28 @@ namespace Drupal\wmmodel\Factory;
 use Drupal\Component\Plugin\Exception\PluginNotFoundException;
 use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
+use Drupal\Core\Entity\EntityTypeRepositoryInterface;
+use Drupal\Core\Entity\Exception\AmbiguousBundleClassException;
+use Drupal\Core\Entity\Exception\AmbiguousEntityClassException;
+use Drupal\Core\Entity\Exception\NoCorrespondingEntityClassException;
 use Drupal\wmmodel\ModelPluginManager;
 
 class ModelFactory implements ModelFactoryInterface
 {
     /** @var EntityTypeManagerInterface */
     protected $entityTypeManager;
+    /** @var EntityTypeRepositoryInterface */
+    protected $entityTypeRepository;
     /** @var ModelPluginManager */
     protected $pluginManager;
 
     public function __construct(
         EntityTypeManagerInterface $entityTypeManager,
+        EntityTypeRepositoryInterface $entityTypeRepository,
         ModelPluginManager $pluginManager
     ) {
         $this->entityTypeManager = $entityTypeManager;
+        $this->entityTypeRepository = $entityTypeRepository;
         $this->pluginManager = $pluginManager;
     }
 
@@ -37,19 +45,17 @@ class ModelFactory implements ModelFactoryInterface
 
     public function getEntityTypeAndBundle(string $className): ?array
     {
-        foreach ($this->pluginManager->getDefinitions() as $definition) {
-            if ($definition['class'] === $className) {
-                return [$definition['entity_type'], $definition['bundle']];
-            }
+        try {
+            $entityTypeId = $this->entityTypeRepository->getEntityTypeFromClass(static::class);
+            $storage = $this->entityTypeManager->getStorage($entityTypeId);
+            $bundle = $storage->getBundleFromClass(static::class);
+        } catch (AmbiguousEntityClassException $e) {
+            return null;
+        } catch (NoCorrespondingEntityClassException $e) {
+            return null;
         }
 
-        foreach ($this->entityTypeManager->getDefinitions() as $definition) {
-            if ($definition->getClass() === $className) {
-                return [$definition->id(), null];
-            }
-        }
-
-        return null;
+        return [$entityTypeId, $bundle];
     }
 
     public function rebuildMapping(): void

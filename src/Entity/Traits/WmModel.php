@@ -2,39 +2,18 @@
 
 namespace Drupal\wmmodel\Entity\Traits;
 
-use Drupal\Core\Entity\Exception\NoCorrespondingEntityClassException;
-
 trait WmModel
 {
-    /** @return static */
-    public static function load($id)
-    {
-        $modelFactory = \Drupal::service('wmmodel.factory.model');
-
-        if (!$definition = $modelFactory->getEntityTypeAndBundle(static::class)) {
-            throw new NoCorrespondingEntityClassException(static::class);
-        }
-
-        [$entityTypeId] = $definition;
-
-        return \Drupal::entityTypeManager()
-            ->getStorage($entityTypeId)
-            ->load($id);
-    }
-    
     /** @return static[] */
     public static function loadMultiple(array $ids = null)
     {
+        $entityTypeRepository = \Drupal::service('entity_type.repository');
         $entityTypeManager = \Drupal::entityTypeManager();
-        $modelFactory = \Drupal::service('wmmodel.factory.model');
 
-        if (!$definition = $modelFactory->getEntityTypeAndBundle(static::class)) {
-            throw new NoCorrespondingEntityClassException(static::class);
-        }
-
-        [$entityTypeId, $bundle] = $definition;
-        $entityType = $entityTypeManager->getDefinition($entityTypeId);
+        $entityTypeId = $entityTypeRepository->getEntityTypeFromClass(static::class);
         $storage = $entityTypeManager->getStorage($entityTypeId);
+        $bundle = $storage->getBundleFromClass(static::class);
+        $entityType = $entityTypeManager->getDefinition($entityTypeId);
 
         $query = $storage->getQuery()
             ->condition($entityType->getKey('bundle'), $bundle);
@@ -50,26 +29,5 @@ trait WmModel
         }
 
         return $storage->loadMultiple($ids);
-    }
-
-    /** @return static */
-    public static function create(array $values = [])
-    {
-        $entityTypeManager = \Drupal::entityTypeManager();
-        $modelFactory = \Drupal::service('wmmodel.factory.model');
-
-        if (!$definition = $modelFactory->getEntityTypeAndBundle(static::class)) {
-            throw new NoCorrespondingEntityClassException(static::class);
-        }
-
-        [$entityTypeId, $bundle] = $definition;
-        $bundleKey = $entityTypeManager
-            ->getDefinition($entityTypeId)
-            ->getKey('bundle');
-        $values[$bundleKey] = $bundle;
-
-        return $entityTypeManager
-            ->getStorage($entityTypeId)
-            ->create($values);
     }
 }

@@ -18,10 +18,6 @@ class AccountProxy extends DrupalAccountProxy
 
         $this->account = $account;
         $this->id = $account->id();
-
-        if (version_compare(\Drupal::VERSION, '8.8.0-alpha1', '<')) {
-            date_default_timezone_set(drupal_get_user_timezone());
-        }
     }
 
     public function getAccount()
