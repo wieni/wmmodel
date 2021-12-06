@@ -83,7 +83,9 @@ trait FieldHelpers
 
         return $this->set($fieldName, array_map(
             static function (\DateTimeInterface $dateTime) use ($storageFormat) {
-                return $dateTime->format($storageFormat);
+                return $dateTime
+                    ->setTimezone(new \DateTimeZone(DateTimeItemInterface::STORAGE_TIMEZONE))
+                    ->format($storageFormat);
             },
             $dateTimes
         ));
