@@ -11,9 +11,7 @@ function wmmodel_entity_type_alter(array &$entityTypes)
             continue;
         }
 
-        $bundleEntityTypeId = $entityTypes[$entityTypeId]->getBundleEntityType();
-
-        if ($bundleEntityTypeId && isset($entityTypes[$bundleEntityTypeId])) {
+        if (isset($definition['bundle'])) {
             continue;
         }
 
