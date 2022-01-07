@@ -31,6 +31,11 @@ function wmmodel_entity_bundle_info_alter(array &$bundles): void
 
     foreach ($manager->getDefinitions() as $definition) {
         $entityTypeId = $definition['entity_type'];
+
+        if (!isset($definition['bundle'])) {
+            continue;
+        }
+
         $bundle = $definition['bundle'];
 
         if (!isset($bundles[$entityTypeId][$bundle])) {
