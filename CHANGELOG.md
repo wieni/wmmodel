@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.0.0]
+### Changed
+- Increase minimum PHP requirement to 7.3 due to Drupal core PHP requirement
+
 ## [1.6.2] - 2022-01-07
 ### Fixed
 - Support overriding all entity type classes, except if the @Model annotation has a bundle. The motivation for this 

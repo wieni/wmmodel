@@ -1,9 +1,9 @@
 <?php
 
 use Wieni\wmcodestyle\PhpCsFixer\Config\Factory;
-use Wieni\wmcodestyle\PhpCsFixer\Config\RuleSet\Php71;
+use Wieni\wmcodestyle\PhpCsFixer\Config\RuleSet\Php73;
 
-$config = Factory::fromRuleSet(new Php71);
+$config = Factory::fromRuleSet(new Php73);
 
 $config->getFinder()
     ->ignoreVCSIgnored(true)
