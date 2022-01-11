@@ -5,8 +5,16 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [2.0.0]
+### Added
+- Add PHP 8 support
+
 ### Changed
+- Increase minimum Drupal core version to 9.3 due to entity bundle class support
 - Increase minimum PHP requirement to 7.3 due to Drupal core PHP requirement
+
+### Removed
+- Remove `WmModelInterface` and `WmModel` trait
+- Remove `ModelFactory` (`wmmodel.factory.model`) and `ModelFactoryInterface`
 
 ## [1.6.2] - 2022-01-07
 ### Fixed

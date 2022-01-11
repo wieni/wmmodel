@@ -2,6 +2,40 @@
 
 This document describes breaking changes and how to upgrade. For a complete list of changes including minor and patch releases, please refer to the [`CHANGELOG`](CHANGELOG.md).
 
+## 2.0.0
+### Core patch
+The core patch that was previously necessary in order to make this module work will no longer apply to core versions of 
+9.3.0 and above. You can safely remove it from your projects.
+
+### `EntityInterface::loadMultiple`
+`EntityInterface::loadMultiple`, when invoked on a bundle class, is no longer guaranteed to return only instances of the
+same class. For example, when calling `BasicPage::loadMultiple([5])` and the node with ID 5 is an article, it will 
+return the article instead of filtering it out. In the future this might be fixed in Drupal core, you can follow 
+[this issue](https://www.drupal.org/project/drupal/issues/3252421) for any progress. 
+
+### `EntityInterface::create`
+`EntityInterface::create`, when invoked on a bundle class, no longer automatically adds the bundle to the `$values` array.
+
+### `ModelFactory`
+`ModelFactory` (`wmmodel.factory.model`) and `ModelFactoryInterface` were removed. The following snippets can be used instead:
+
+```diff
+-[$entityTypeId, $bundle] = $this->modelFactory->getEntityTypeAndBundle($class);
++$entityTypeId = $this->entityTypeRepository->getEntityTypeFromClass($class);
++$storage = $this->entityTypeManager->getStorage($entityTypeId);
++$bundle = $storage->getBundleFromClass($class);
+```
+
+```diff
+-$className = $this->modelFactory->getClassName($entityType, $bundle);
++$className = $this->entityTypeManager->getStorage($entityType->id())->getEntityClass($bundle);
+```
+
+```diff
+-$className = $this->modelFactory->rebuildMapping();
++$className = $this->modelPluginManager->clearCachedDefinitions();
+```
+
 ## 1.1.0
 The `removeReference` & `removeFromList` field helpers were removed. Copy them to your classes if you still need them.
 
