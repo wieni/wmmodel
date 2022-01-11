@@ -1,5 +1,8 @@
 <?php
 
+/**
+ * Implements @see hook_entity_type_alter
+ */
 function wmmodel_entity_type_alter(array &$entityTypes)
 {
     $manager = \Drupal::getContainer()->get('plugin.manager.wmmodel.model');
@@ -16,5 +19,29 @@ function wmmodel_entity_type_alter(array &$entityTypes)
         }
 
         $entityTypes[$definition['entity_type']]->setClass($definition['class']);
+    }
+}
+
+/**
+ * Implements @see hook_entity_bundle_info_alter
+ */
+function wmmodel_entity_bundle_info_alter(array &$bundles): void
+{
+    $manager = \Drupal::getContainer()->get('plugin.manager.wmmodel.model');
+
+    foreach ($manager->getDefinitions() as $definition) {
+        $entityTypeId = $definition['entity_type'];
+
+        if (!isset($definition['bundle'])) {
+            continue;
+        }
+
+        $bundle = $definition['bundle'];
+
+        if (!isset($bundles[$entityTypeId][$bundle])) {
+            continue;
+        }
+
+        $bundles[$entityTypeId][$bundle]['class'] = $definition['class'];
     }
 }

@@ -6,7 +6,6 @@ use Drupal\Core\Entity\ContentEntityBase;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Tests\UnitTestCase;
 use Drupal\wmmodel\Controller\ArgumentResolver\ModelValueResolver;
-use Drupal\wmmodel\Entity\Interfaces\WmModelInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Controller\ArgumentResolver;
 use Symfony\Component\HttpKernel\Controller\ArgumentResolverInterface;
@@ -46,13 +45,13 @@ class ArgumentResolverTest extends UnitTestCase
     }
 }
 
-class MockModel extends ContentEntityBase implements WmModelInterface
+class MockModel extends ContentEntityBase
 {
 }
 
 class MockController
 {
-    public function show(WmModelInterface $entity, FormStateInterface $formState)
+    public function show(MockModel $entity, FormStateInterface $formState)
     {
     }
 }

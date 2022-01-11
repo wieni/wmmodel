@@ -3,10 +3,10 @@
 namespace Drupal\wmmodel;
 
 use Drupal\Core\Cache\CacheBackendInterface;
+use Drupal\Core\Entity\ContentEntityInterface;
 use Drupal\Core\Extension\ModuleHandlerInterface;
 use Drupal\Core\Plugin\DefaultPluginManager;
 use Drupal\wmmodel\Annotation\Model;
-use Drupal\wmmodel\Entity\Interfaces\WmModelInterface;
 
 class ModelPluginManager extends DefaultPluginManager
 {
@@ -19,7 +19,7 @@ class ModelPluginManager extends DefaultPluginManager
             'Entity',
             $namespaces,
             $moduleHandler,
-            WmModelInterface::class,
+            ContentEntityInterface::class,
             Model::class
         );
         $this->alterInfo('wmmodel_model_info');
