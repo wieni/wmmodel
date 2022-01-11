@@ -2,8 +2,8 @@
 
 namespace Drupal\wmmodel\Controller\ArgumentResolver;
 
+use Drupal\Core\Entity\ContentEntityInterface;
 use Drupal\Core\Form\FormStateInterface;
-use Drupal\wmmodel\Entity\Interfaces\WmModelInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Controller\ArgumentValueResolverInterface;
 use Symfony\Component\HttpKernel\ControllerMetadata\ArgumentMetadata;
@@ -13,7 +13,7 @@ class ModelValueResolver implements ArgumentValueResolverInterface
 {
     public function supports(Request $request, ArgumentMetadata $argument)
     {
-        $isArgumentSupported = is_a($argument->getType(), WmModelInterface::class, true)
+        $isArgumentSupported = is_a($argument->getType(), ContentEntityInterface::class, true)
             // We want to typehint $formState instead of $form_state
             // @see https://www.drupal.org/project/drupal/issues/3006502
             || is_a($argument->getType(), FormStateInterface::class, true);

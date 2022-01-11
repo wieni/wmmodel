@@ -12,7 +12,6 @@ use Drupal\node\Entity\Node;
 use Drupal\node\Entity\NodeType;
 use Drupal\node\NodeTypeInterface;
 use Drupal\wmmodel\Annotation\Model;
-use Drupal\wmmodel\Entity\Interfaces\WmModelInterface;
 use Drupal\wmmodel\ModelPluginManager;
 
 abstract class ModelPluginTestBase extends KernelTestBase
@@ -72,6 +71,6 @@ class MockModelPluginManager extends ModelPluginManager
     }
 }
 
-class NodeMock extends Node implements WmModelInterface
+class NodeMock extends Node
 {
 }

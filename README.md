@@ -75,13 +75,12 @@ instructions on how to manually apply patches.
 
 ## How does it work?
 ### Creating models
-Models are Drupal plugins with the `@Model` annotation, extending their
-entity type class and implementing
-`Drupal\wmmodel\Entity\Interfaces\WmModelInterface`. The annotation has
-two required parameters, `entity_type` and `bundle`. Classes with this
-annotation should be placed in the `Entity` namespace of your module. To
-make sure the static `create` method works as expected, you should also
-include the `Drupal\wmmodel\Entity\Traits\WmModel` trait in your class.
+Models are Drupal plugins with the `@Model` annotation, extending their entity type class. Classes with this
+annotation should be placed in the `Entity` namespace of your module.
+
+The annotation two required parameters:
+- if only `entity_type` is provided, the entity type class is overridden using `hook_entity_type_alter`
+- if both `entity_type` and `bundle` are provided, the bundle class is overridden using `hook_entity_bundle_info_alter`. 
 
 ```php
 <?php
@@ -89,8 +88,6 @@ include the `Drupal\wmmodel\Entity\Traits\WmModel` trait in your class.
 namespace Drupal\mymodule\Entity\Node;
 
 use Drupal\node\Entity\Node;
-use Drupal\wmmodel\Entity\Interfaces\WmModelInterface;
-use Drupal\wmmodel\Entity\Traits\WmModel;
 
 /**
  * @Model(
@@ -98,9 +95,8 @@ use Drupal\wmmodel\Entity\Traits\WmModel;
  *     bundle = "page"
  * )
  */
-class Page extends Node implements WmModelInterface
+class Page extends Node
 {
-    use WmModel;
 }
 ```
 
