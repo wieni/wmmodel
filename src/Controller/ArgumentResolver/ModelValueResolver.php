@@ -23,9 +23,18 @@ class ModelValueResolver implements ArgumentValueResolverInterface
 
     public function resolve(Request $request, ArgumentMetadata $argument)
     {
+        // First look for an exact match based on type AND name
+        if ($attribute = $request->attributes->get($argument->getName())) {
+            if ($this->isMatch($attribute, $argument)) {
+                yield $attribute;
+
+                return;
+            }
+        }
+
         foreach ($request->attributes->getIterator() as $name => $attribute) {
-            if (is_object($attribute) && is_a($attribute, $argument->getType())) {
-                yield $request->attributes->get($name);
+            if ($this->isMatch($attribute, $argument)) {
+                yield $attribute;
 
                 return;
             }
@@ -36,5 +45,10 @@ class ModelValueResolver implements ArgumentValueResolverInterface
 
             return;
         }
+    }
+
+    private function isMatch($attribute, ArgumentMetadata $argument): bool
+    {
+        return is_object($attribute) && is_a($attribute, $argument->getType());
     }
 }
