@@ -7,7 +7,6 @@ use Drupal\Core\Form\FormStateInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Controller\ArgumentValueResolverInterface;
 use Symfony\Component\HttpKernel\ControllerMetadata\ArgumentMetadata;
-use function Symfony\Component\DependencyInjection\Loader\Configurator\iterator;
 
 class ModelValueResolver implements ArgumentValueResolverInterface
 {
