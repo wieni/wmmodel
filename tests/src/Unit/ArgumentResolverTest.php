@@ -16,7 +16,8 @@ class ArgumentResolverTest extends UnitTestCase
     /** @var ArgumentResolverInterface */
     protected $argumentResolver;
 
-    protected function setUp() {
+    protected function setUp()
+    {
         parent::setUp();
 
         $this->argumentResolver = new ArgumentResolver(
@@ -27,21 +28,28 @@ class ArgumentResolverTest extends UnitTestCase
 
     public function testResolveControllerArguments(): void
     {
-        $mockEntity = $this->getMockBuilder(MockModel::class)
-            ->disableOriginalConstructor()
-            ->getMock();
-        $mockFormState = $this->getMockBuilder(FormStateInterface::class)
-            ->getMock();
+        $foo = $this->createMock(MockModel::class);
+        $baz = $this->createMock(MockModel::class);
+        $mockFormState = $this->createMock(FormStateInterface::class);
 
-        $request = Request::create('/');
-        $request->attributes->set('foobar', $mockEntity);
+        $request = new Request();
+        $request->attributes->set('foo_bar', $foo);
+        $request->attributes->set('bazQux', $baz);
         $request->attributes->set('form_state', $mockFormState);
-        $controller = [new MockController(), 'show'];
+
+        $controllerClass = new class {
+            public function show(MockModel $bazQux, MockModel $fooBar, FormStateInterface $formState): void
+            {
+            }
+        };
+
+        $controller = [$controllerClass, 'show'];
 
         $arguments = $this->argumentResolver->getArguments($request, $controller);
 
-        $this->assertEquals($mockEntity, $arguments[0]);
-        $this->assertEquals($mockFormState, $arguments[1]);
+        static::assertSame($baz, $arguments[0]);
+        static::assertSame($foo, $arguments[1]);
+        static::assertSame($mockFormState, $arguments[2]);
     }
 }
 
@@ -49,9 +57,3 @@ class MockModel extends ContentEntityBase
 {
 }
 
-class MockController
-{
-    public function show(MockModel $entity, FormStateInterface $formState)
-    {
-    }
-}
