@@ -7,7 +7,6 @@ use Drupal\Core\Form\FormStateInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Controller\ArgumentValueResolverInterface;
 use Symfony\Component\HttpKernel\ControllerMetadata\ArgumentMetadata;
-use function Symfony\Component\DependencyInjection\Loader\Configurator\iterator;
 
 class ModelValueResolver implements ArgumentValueResolverInterface
 {
@@ -23,9 +22,29 @@ class ModelValueResolver implements ArgumentValueResolverInterface
 
     public function resolve(Request $request, ArgumentMetadata $argument)
     {
-        foreach ($request->attributes->getIterator() as $name => $attribute) {
-            if (is_object($attribute) && is_a($attribute, $argument->getType())) {
-                yield $request->attributes->get($name);
+        // Look for an exact match based on type and name
+        if ($attribute = $request->attributes->get($argument->getName())) {
+            if ($this->isTypeMatch($attribute, $argument)) {
+                yield $attribute;
+
+                return;
+            }
+        }
+
+        // Look for a match based on type and snake cased name
+        $snakeName = $this->camelCaseToSnakeCase($argument->getName());
+        if ($attribute = $request->attributes->get($snakeName)) {
+            if ($this->isTypeMatch($attribute, $argument)) {
+                yield $attribute;
+
+                return;
+            }
+        }
+
+        // Look for a match based on type only
+        foreach ($request->attributes->getIterator() as $attribute) {
+            if ($this->isTypeMatch($attribute, $argument)) {
+                yield $attribute;
 
                 return;
             }
@@ -33,8 +52,16 @@ class ModelValueResolver implements ArgumentValueResolverInterface
 
         if ($argument->hasDefaultValue()) {
             yield $argument->getDefaultValue();
-
-            return;
         }
+    }
+
+    protected function isTypeMatch($attribute, ArgumentMetadata $argument): bool
+    {
+        return is_object($attribute) && is_a($attribute, $argument->getType());
+    }
+
+    protected function camelCaseToSnakeCase(string $string): string
+    {
+        return strtolower(preg_replace('/(?<!^)[A-Z]/', '_$0', $string));
     }
 }
