@@ -16,7 +16,7 @@ class ArgumentResolverTest extends UnitTestCase
     /** @var ArgumentResolverInterface */
     protected $argumentResolver;
 
-    protected function setUp()
+    protected function setUp(): void
     {
         parent::setUp();
 
@@ -50,6 +50,29 @@ class ArgumentResolverTest extends UnitTestCase
         static::assertSame($baz, $arguments[0]);
         static::assertSame($foo, $arguments[1]);
         static::assertSame($mockFormState, $arguments[2]);
+    }
+
+    public function testItFallbacksOnType(): void
+    {
+        $mockEntity = $this->createMock(MockModel::class);
+        $mockFormState = $this->createMock(FormStateInterface::class);
+
+        $request = new Request();
+        $request->attributes->set('bazqux', $mockFormState);
+        $request->attributes->set('foobar', $mockEntity);
+
+        $controllerClass = new class {
+            public function show(MockModel $totallyDifferentName, FormStateInterface $alsoDifferent): void
+            {
+            }
+        };
+
+        $controller = [$controllerClass, 'show'];
+
+        $arguments = $this->argumentResolver->getArguments($request, $controller);
+
+        static::assertSame($mockEntity, $arguments[0]);
+        static::assertSame($mockFormState, $arguments[1]);
     }
 }
 
