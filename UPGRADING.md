@@ -2,6 +2,42 @@
 
 This document describes breaking changes and how to upgrade. For a complete list of changes including minor and patch releases, please refer to the [`CHANGELOG`](CHANGELOG.md).
 
+## 3.0.0
+### EntityBundleConverter
+Specifying bundles for the entity route parameter converter has been a Drupal core feature since 9.2 
+([more info](https://www.drupal.org/node/3155568)). Since we now require Drupal 9.3 we can remove our own 
+`EntityBundleConverter`.
+
+#### Before
+```yml
+mymodule.company.suggestion:
+    path: '/companies/{company}/suggestion'
+    defaults:
+        _controller: 'Drupal\wmcustom\Controller\Node\CompanyController::addSuggestion'
+    options:
+        parameters:
+            company:
+                type: 'entity:node:company'
+    requirements:
+      _access: 'TRUE'
+```
+
+#### After
+```yml
+mymodule.company.suggestion:
+    path: '/companies/{company}/suggestion'
+    defaults:
+        _controller: 'Drupal\wmcustom\Controller\Node\CompanyController::addSuggestion'
+    options:
+        parameters:
+            company:
+                type: 'entity:node'
+                bundle:
+                    - 'company'
+    requirements:
+      _access: 'TRUE'
+```
+
 ## 2.0.0
 ### Core patch
 The core patch that was previously necessary in order to make this module work will no longer apply to core versions of 
