@@ -14,5 +14,16 @@ function wmmodel_update_8001()
 function wmmodel_update_8002()
 {
     \Drupal::configFactory()->getEditable('wmmodel.settings')
-        ->set('override_account_proxy', true);
+        ->set('override_account_proxy', true)
+        ->save();
+}
+
+/**
+ * Set resolve_form_state_argument_type option for existing sites
+ */
+function wmmodel_update_8003()
+{
+    \Drupal::configFactory()->getEditable('wmmodel.settings')
+        ->set('resolve_form_state_argument_type', true)
+        ->save();
 }

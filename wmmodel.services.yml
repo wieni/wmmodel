@@ -1,6 +1,8 @@
 services:
     wmmodel.argument_resolver:
         class: Drupal\wmmodel\Controller\ArgumentResolver\ModelValueResolver
+        arguments:
+            - '@config.factory'
 
     plugin.manager.wmmodel.model:
         class: Drupal\wmmodel\ModelPluginManager

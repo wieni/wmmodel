@@ -111,6 +111,14 @@ A Drupal core issue about this subject can be found [here](https://www.drupal.or
 
 To enable this feature, set `override_account_proxy` to `true` in the `wmmodel.settings` config.
 
+### Resolving `FormStateInterface` arguments
+Drupal core only resolves form state arguments if the argument name matches `form_state`. This module provides the 
+option to use the entity argument resolving logic as explained above for `FormStateInterface` arguments as well.
+
+A Drupal core issue about this subject can be found [here](https://www.drupal.org/project/drupal/issues/3006502).
+
+To enable this feature, set `resolve_form_state_argument_type` to `true` in the `wmmodel.settings` config.
+
 ## Changelog
 All notable changes to this project will be documented in the
 [CHANGELOG](CHANGELOG.md) file.

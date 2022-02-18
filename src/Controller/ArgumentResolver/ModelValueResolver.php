@@ -2,6 +2,7 @@
 
 namespace Drupal\wmmodel\Controller\ArgumentResolver;
 
+use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\Entity\ContentEntityInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Symfony\Component\HttpFoundation\Request;
@@ -10,14 +11,28 @@ use Symfony\Component\HttpKernel\ControllerMetadata\ArgumentMetadata;
 
 class ModelValueResolver implements ArgumentValueResolverInterface
 {
+    /** @var ConfigFactoryInterface */
+    protected $configFactory;
+
+    public function __construct(
+        ConfigFactoryInterface $configFactory
+    ) {
+        $this->configFactory = $configFactory;
+    }
+
     public function supports(Request $request, ArgumentMetadata $argument)
     {
-        $isArgumentSupported = is_a($argument->getType(), ContentEntityInterface::class, true)
-            // We want to typehint $formState instead of $form_state
-            // @see https://www.drupal.org/project/drupal/issues/3006502
-            || is_a($argument->getType(), FormStateInterface::class, true);
+        $config = $this->configFactory->get('wmmodel_settings');
+        $isEntity = is_a($argument->getType(), ContentEntityInterface::class, true);
+        $isFormState = is_a($argument->getType(), FormStateInterface::class, true);
 
-        return $isArgumentSupported && !empty(iterator_to_array($this->resolve($request, $argument)));
+        // We want to typehint $formState instead of $form_state
+        // @see https://www.drupal.org/project/drupal/issues/3006502
+        if (!empty($config['resolve_form_state_argument_type'])) {
+            return $isEntity || $isFormState;
+        }
+
+        return $isEntity;
     }
 
     public function resolve(Request $request, ArgumentMetadata $argument)
