@@ -3,6 +3,44 @@
 This document describes breaking changes and how to upgrade. For a complete list of changes including minor and patch releases, please refer to the [`CHANGELOG`](CHANGELOG.md).
 
 ## 3.0.0
+### Module rename
+A lot of classes, config, etc. have changed.
+
+1. Install the new `entity_model` module
+
+```bash
+composer install drupal/entity_model
+drush en entity_model
+```
+
+2. Use the bash script in `scripts/update-to-v3.sh` for an
+   automatic upgrade of your project. Paths that have to be scanned should be passed as arguments:
+
+```bash
+chmod +x ./public/modules/contrib/wmmodel/scripts/update-to-v3.sh
+./public/modules/contrib/wmmodel/scripts/update-to-v3.sh config/* public/modules/custom/* public/themes/custom/* public/sites/*
+```
+
+If you're using macOS, make sure to run this before the script:
+```bash
+brew install gnu-sed
+PATH="$(brew --prefix gnu-sed)/libexec/gnubin:$PATH"
+```
+
+3. Apply any changes:
+
+```bash
+drush cr
+drush cim -y
+```
+
+4. Deploy these changes to all your environments
+5. Remove the old module files:
+
+```bash
+composer remove wieni/wmmodel
+```
+
 ### EntityBundleConverter
 Specifying bundles for the entity route parameter converter has been a Drupal core feature since 9.2 
 ([more info](https://www.drupal.org/node/3155568)). Since we now require Drupal 9.3 we can remove our own 
