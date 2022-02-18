@@ -105,8 +105,11 @@ mymodule.company.suggestion:
 This module provides an alternative implementation of
 `Drupal\Core\Session\AccountProxyInterface` (returned by the
 `current_user` service) that makes the `getAccount` method return the
-actual User entity instead of an instance of
-`Drupal\Core\Session\UserSession`.
+actual User entity instead of an instance of `Drupal\Core\Session\UserSession`.
+
+A Drupal core issue about this subject can be found [here](https://www.drupal.org/node/2345611).
+
+To enable this feature, set `override_account_proxy` to `true` in the `wmmodel.settings` config.
 
 ## Changelog
 All notable changes to this project will be documented in the

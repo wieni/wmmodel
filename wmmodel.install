@@ -7,3 +7,12 @@ function wmmodel_update_8001()
 {
     \Drupal::state()->delete('wmmodel');
 }
+
+/**
+ * Set override_account_proxy option for existing sites
+ */
+function wmmodel_update_8002()
+{
+    \Drupal::configFactory()->getEditable('wmmodel.settings')
+        ->set('override_account_proxy', true);
+}
