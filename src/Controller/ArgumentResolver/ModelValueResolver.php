@@ -22,13 +22,13 @@ class ModelValueResolver implements ArgumentValueResolverInterface
 
     public function supports(Request $request, ArgumentMetadata $argument)
     {
-        $config = $this->configFactory->get('wmmodel_settings');
+        $config = $this->configFactory->get('wmmodel.settings');
         $isEntity = is_a($argument->getType(), ContentEntityInterface::class, true);
         $isFormState = is_a($argument->getType(), FormStateInterface::class, true);
 
         // We want to typehint $formState instead of $form_state
         // @see https://www.drupal.org/project/drupal/issues/3006502
-        if (!empty($config['resolve_form_state_argument_type'])) {
+        if (!empty($config->get('resolve_form_state_argument_type'))) {
             return $isEntity || $isFormState;
         }
 
