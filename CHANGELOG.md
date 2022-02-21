@@ -14,12 +14,16 @@ Check [`UPGRADING.md`](UPGRADING.md) for instructions.
 ### Removed
 - Remove EntityBundleConverter
 
-## [2.1.0]
+## [2.1.1] - 2022-02-19
+### Fixed
+- Fix optional argument resolving of FormStateInterface
+
+## [2.1.0] - 2022-02-18
 ### Changed
 - Make overriding AccountProxy optional
 - Make argument resolving of FormStateInterface optional
 
-## [2.0.0]
+## [2.0.0] - 2022-01-20
 ### Added
 - Add PHP 8 support
 
