@@ -13,7 +13,9 @@ composer install drupal/entity_model
 drush en entity_model
 ```
 
-2. Use the bash script in `scripts/update-to-v3.sh` for an
+2. Deploy to all your environments
+
+3. Use the bash script in `scripts/update-to-v3.sh` for an
    automatic upgrade of your project. Paths that have to be scanned should be passed as arguments:
 
 ```bash
@@ -27,15 +29,15 @@ brew install gnu-sed
 PATH="$(brew --prefix gnu-sed)/libexec/gnubin:$PATH"
 ```
 
-3. Apply any changes:
+4. Apply any changes:
 
 ```bash
 drush cr
 drush cim -y
 ```
 
-4. Deploy these changes to all your environments
-5. Remove the old module files:
+5. Deploy these changes to all your environments
+6. Remove the old module files:
 
 ```bash
 composer remove wieni/wmmodel
