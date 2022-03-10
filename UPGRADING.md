@@ -43,6 +43,7 @@ drush cim -y
 composer remove wieni/wmmodel
 ```
 
+## 2.2.0
 ### EntityBundleConverter
 Specifying bundles for the entity route parameter converter has been a Drupal core feature since 9.2 
 ([more info](https://www.drupal.org/node/3155568)). Since we now require Drupal 9.3 we can remove our own 
