@@ -31,6 +31,7 @@ trait EntityTranslatorTrait
             !$entity
             || !$entity instanceof TranslatableInterface
             || $entity->language()->getId() === $langcode
+            || $entity->isTranslatable() === false
         ) {
             return $entity;
         }
