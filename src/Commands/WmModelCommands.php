@@ -45,6 +45,7 @@ class WmModelCommands extends DrushCommands
             $bundles = $this->entityTypeManager
                 ->getStorage($bundleEntityType)
                 ->getQuery()
+                ->accessCheck(false)
                 ->execute();
 
             foreach ($bundles as $bundle) {

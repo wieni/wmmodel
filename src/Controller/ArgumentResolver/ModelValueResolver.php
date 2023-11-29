@@ -20,7 +20,7 @@ class ModelValueResolver implements ArgumentValueResolverInterface
         $this->configFactory = $configFactory;
     }
 
-    public function supports(Request $request, ArgumentMetadata $argument)
+    public function supports(Request $request, ArgumentMetadata $argument): bool
     {
         $config = $this->configFactory->get('wmmodel.settings');
         $isEntity = is_a($argument->getType(), ContentEntityInterface::class, true);
@@ -35,7 +35,7 @@ class ModelValueResolver implements ArgumentValueResolverInterface
         return $isEntity;
     }
 
-    public function resolve(Request $request, ArgumentMetadata $argument)
+    public function resolve(Request $request, ArgumentMetadata $argument): iterable
     {
         // Look for an exact match based on type and name
         if ($attribute = $request->attributes->get($argument->getName())) {
